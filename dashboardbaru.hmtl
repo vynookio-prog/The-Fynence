@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>Fynence. Private Ledger</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-secondary": "#003824",
+          "border-teal": "rgba(0, 242, 194, 0.18)",
+          "status-critical": "#F43F5E",
+          "text-secondary": "#94A3B8",
+          "surface-container-low": "#191c1f",
+          "surface-card": "#17212B",
+          "on-primary-fixed": "#002118",
+          "on-secondary-fixed-variant": "#005236",
+          "surface-container-high": "#272a2e",
+          "primary-fixed": "#2effce",
+          "surface-tint": "#00e0b4",
+          "tertiary-fixed-dim": "#ffb693",
+          "surface-container": "#1d2023",
+          "surface-elevated": "#121920",
+          "on-secondary-fixed": "#002113",
+          "on-background": "#e1e2e7",
+          "inverse-on-surface": "#2e3134",
+          "on-tertiary-fixed": "#351000",
+          "outline-variant": "#3a4a44",
+          "secondary-container": "#00a572",
+          "inverse-primary": "#006b55",
+          "surface-charcoal": "#0D1217",
+          "on-error": "#690005",
+          "tertiary-container": "#ffcbb4",
+          "background": "#111417",
+          "surface-container-lowest": "#0b0f12",
+          "on-error-container": "#ffdad6",
+          "outline": "#84948d",
+          "error": "#ffb4ab",
+          "status-warning": "#F59E0B",
+          "error-container": "#93000a",
+          "on-primary-container": "#006a53",
+          "border-subtle": "rgba(255, 255, 255, 0.08)",
+          "primary-container": "#00f2c2",
+          "surface-container-highest": "#323538",
+          "on-tertiary-container": "#9e3f00",
+          "text-tertiary": "#64748B",
+          "accent-teal-glow": "rgba(0, 242, 194, 0.14)",
+          "tertiary-fixed": "#ffdbcc",
+          "accent-orange": "#FF8A00",
+          "on-secondary-container": "#00311f",
+          "text-primary": "#F8FAFC",
+          "secondary": "#4edea3",
+          "secondary-fixed-dim": "#4edea3",
+          "on-primary-fixed-variant": "#00513f",
+          "surface-obsidian": "#080B0E",
+          "tertiary": "#ffefea",
+          "surface-bright": "#36393d",
+          "status-success": "#10B981",
+          "primary": "#c5ffe9",
+          "inverse-surface": "#e1e2e7",
+          "surface": "#111417",
+          "secondary-fixed": "#6ffbbe",
+          "on-primary": "#00382b",
+          "surface-variant": "#323538",
+          "on-tertiary-fixed-variant": "#7a3000",
+          "primary-fixed-dim": "#00e0b4",
+          "on-surface-variant": "#b9cac2",
+          "surface-dim": "#111417",
+          "on-tertiary": "#561f00",
+          "on-surface": "#e1e2e7",
+          "surface-glass": "rgba(18, 25, 32, 0.72)",
+          "border-amber": "rgba(255, 107, 0, 0.24)"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-3xl": "6rem",
+          "space-xs": "0.25rem",
+          "space-md": "1rem",
+          "gutter": "1.5rem",
+          "gutter-mobile": "1rem",
+          "space-sm": "0.5rem",
+          "space-xl": "2.5rem",
+          "margin-mobile": "1.25rem",
+          "space-2xl": "4rem",
+          "space-lg": "1.5rem",
+          "margin": "3rem"
+        },
+        "fontFamily": {
+          "headline-sm": ["Space Grotesk"],
+          "body-sm": ["Inter"],
+          "metric-val-lg": ["Space Grotesk"],
+          "body-lg": ["Inter"],
+          "display-hero-mobile": ["Space Grotesk"],
+          "label-mono-sm": ["JetBrains Mono"],
+          "body-md": ["Inter"],
+          "display-hero": ["Space Grotesk"],
+          "headline-lg": ["Space Grotesk"],
+          "headline-xl": ["Space Grotesk"],
+          "label-mono-xs": ["JetBrains Mono"],
+          "headline-xl-mobile": ["Space Grotesk"]
+        },
+        "fontSize": {
+          "headline-sm": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "body-sm": ["13px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "400"}],
+          "metric-val-lg": ["28px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+          "display-hero-mobile": ["36px", {"lineHeight": "42px", "letterSpacing": "-0.025em", "fontWeight": "700"}],
+          "label-mono-sm": ["11px", {"lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "500"}],
+          "body-md": ["15px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+          "display-hero": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.035em", "fontWeight": "700"}],
+          "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+          "headline-xl": ["44px", {"lineHeight": "52px", "letterSpacing": "-0.03em", "fontWeight": "600"}],
+          "label-mono-xs": ["10px", {"lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600"}],
+          "headline-xl-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-surface-obsidian font-body-md text-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"><div class="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_25%_10%,rgba(0,242,194,0.06),transparent_65%),radial-gradient(circle_at_85%_75%,rgba(0,165,114,0.04),transparent_50%)] z-0"></div><aside class="fixed left-0 top-0 h-full w-72 bg-surface-charcoal/80 backdrop-blur-2xl z-50 flex flex-col justify-between shadow-[0_1px_16px_rgba(0,0,0,0.4)]"><div class="flex flex-col"><div class="h-20 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="flex items-center justify-center p-1 rounded-xl bg-surface-elevated/70 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"><img alt="Standalone high-definition vector logo mark for Fynence in Emerald Cyan and Cyber Jade. Features the iconic aerodynamic swept-wing 'F' monogram in polished titanium white with an electric cyan glowing spark base, set inside a luxury dark squircle badge." class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WvySphBg0pJOtSRX-WXcDYOa8jVXl20CoNVk7JPznF4hEjWAMpXjX2QWmMLrJM5pJGOTumuzGI4Dhtwfl2Vai04K5FNyaRKp1mfVftf5oRRt9zlRKI6McqWMLIY9RURevv1UDQ7Ofc4IenHZ23IDS1ohV-9OpjrEtLX9RdVb9H5FHtOVQASiV8AOQzNZb70mH9C9h5C7pweEWetoJyEie94XStrkxFI3p1_DhzPh72Gh0TunaZ7aUiqsY"/></div><div class="flex flex-col"><div class="flex items-center gap-1"><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-text-primary">Fynence</span><span class="h-1.5 w-1.5 rounded-full bg-primary-container inline-block"></span></div><span class="font-label-mono-xs text-label-mono-xs text-text-tertiary uppercase tracking-widest">Private Ledger</span></div></div><div class="px-2 py-0.5 rounded-full bg-surface-elevated flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span><span class="font-label-mono-xs text-label-mono-xs text-primary-fixed">v2.4</span></div></div><div class="px-gutter pt-space-md pb-space-xs"><span class="font-label-mono-xs text-label-mono-xs uppercase text-text-tertiary tracking-widest">Institutional Navigation</span></div><nav class="flex flex-col gap-1 px-space-sm" data-active-classes="bg-surface-elevated text-text-primary shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]"><a aria-current="page" class="group flex items-center justify-between px-space-md py-3 rounded-xl font-body-sm transition-all bg-surface-elevated text-text-primary shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]" data-path="dashboard" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px] text-text-tertiary group-hover:text-primary-fixed transition-colors">grid_view</span><span>DASHBOARD</span></div><span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">01</span></a><a class="group flex items-center justify-between px-space-md py-3 rounded-xl font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-elevated/60 hover:text-on-surface transition-all" data-path="market" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px] text-text-tertiary group-hover:text-primary-fixed transition-colors">monitoring</span><span>MARKET</span></div><span class="px-1.5 py-0.5 rounded bg-surface-elevated font-label-mono-xs text-label-mono-xs text-secondary-fixed">AI</span></a><a class="group flex items-center justify-between px-space-md py-3 rounded-xl font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-elevated/60 hover:text-on-surface transition-all" data-path="money" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px] text-text-tertiary group-hover:text-primary-fixed transition-colors">account_balance_wallet</span><span>MONEY</span></div><span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">LIQ</span></a><a class="group flex items-center justify-between px-space-md py-3 rounded-xl font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-elevated/60 hover:text-on-surface transition-all" data-path="trading" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px] text-text-tertiary group-hover:text-primary-fixed transition-colors">candlestick_chart</span><span>TRADING</span></div><span class="w-2 h-2 rounded-full bg-status-success"></span></a><a class="group flex items-center justify-between px-space-md py-3 rounded-xl font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-elevated/60 hover:text-on-surface transition-all" data-path="news" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px] text-text-tertiary group-hover:text-primary-fixed transition-colors">public</span><span>NEWS</span></div><span class="font-label-mono-xs text-label-mono-xs text-status-warning font-semibold">LIVE</span></a><a class="group flex items-center justify-between px-space-md py-3 rounded-xl font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-elevated/60 hover:text-on-surface transition-all" data-path="calendar" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px] text-text-tertiary group-hover:text-primary-fixed transition-colors">event_repeat</span><span>CALENDAR</span></div><span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">SYNC</span></a><a class="group flex items-center justify-between px-space-md py-3 rounded-xl font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-elevated/60 hover:text-on-surface transition-all" data-path="ai-cognition" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px] text-primary-fixed group-hover:text-primary-fixed transition-colors">neurology</span><span class="text-text-primary font-medium">AI COGNITION</span></div><span class="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim animate-ping"></span></a></nav></div><div class="p-space-md"><div class="p-space-md rounded-xl bg-surface-elevated/90 backdrop-blur-xl flex flex-col gap-space-sm"><div class="flex items-center justify-between"><span class="font-label-mono-xs text-label-mono-xs text-text-secondary uppercase">Psych Engine</span><span class="font-label-mono-xs text-label-mono-xs text-status-success font-semibold">98.4 SCORE</span></div><div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden"><div class="h-full w-11/12 bg-gradient-to-r from-secondary to-primary-container rounded-full"></div></div><div class="flex items-center justify-between pt-1"><span class="font-body-sm text-body-sm text-on-surface-variant">Zero Tilt Risk</span><span class="material-symbols-outlined text-[16px] text-secondary">shield</span></div></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-20 bg-surface-obsidian/75 backdrop-blur-2xl z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm px-space-sm py-1 rounded-full bg-surface-elevated/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]"><span class="w-2 h-2 rounded-full bg-status-success"></span><span class="font-label-mono-xs text-label-mono-xs uppercase text-text-primary tracking-wider">Node SYNCED</span><span class="text-text-tertiary">|</span><span class="font-label-mono-xs text-label-mono-xs text-primary-fixed font-semibold">MSFT / FIX 4.4</span></div><div class="hidden xl:flex items-center gap-space-xs"><span class="font-label-mono-xs text-label-mono-xs uppercase text-text-tertiary">Ledger Auth:</span><span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant">ED25519-VAULT-PROD</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center bg-surface-elevated p-1 rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]"><button class="px-2.5 py-1 rounded-lg font-label-mono-xs text-label-mono-xs font-semibold bg-surface-charcoal text-text-primary transition-all">USD</button><button class="px-2.5 py-1 rounded-lg font-label-mono-xs text-label-mono-xs text-text-tertiary hover:text-on-surface transition-all">IDR</button></div><button class="flex items-center gap-1.5 bg-primary-container hover:bg-primary-fixed text-on-primary-container px-space-md py-2 rounded-xl font-headline-sm text-body-sm font-semibold tracking-wide transition-all shadow-[0_0_16px_rgba(0,242,194,0.22)]"><span class="material-symbols-outlined text-[18px]">add</span><span>ADD ORDER</span></button><button class="relative w-10 h-10 rounded-xl bg-surface-elevated flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-status-critical ring-2 ring-surface-obsidian"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="relative pt-20 w-full min-h-screen bg-surface-obsidian px-space-xl pb-space-2xl"><div class="flex flex-col w-full gap-space-xl">
+<!-- Top Operator Banner & Live Synchronicity -->
+<div class="relative overflow-hidden rounded-xl bg-surface-card/60 p-space-lg shadow-2xl backdrop-blur-2xl">
+<div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary-container/10 blur-3xl pointer-events-none"></div>
+<div class="absolute -left-20 -bottom-20 h-56 w-56 rounded-full bg-accent-orange/10 blur-3xl pointer-events-none"></div>
+<div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-primary-fixed tracking-widest">PRIVATE FINANCE STUDIO // 2026</span>
+<span class="h-1 w-1 rounded-full bg-primary-fixed inline-block"></span>
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-text-tertiary">VAULT PROTOCOL 0x98A</span>
+</div>
+<div class="flex items-baseline gap-space-md mt-1">
+<h1 class="font-headline-xl text-headline-xl text-text-primary tracking-tight font-bold">GOOD NIGHT<span class="text-accent-orange">.</span></h1>
+</div>
+<div class="flex items-center gap-space-sm text-text-secondary font-body-sm text-body-sm">
+<span class="font-label-mono-sm text-label-mono-sm text-text-tertiary">OPERATOR</span>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">FynenceDev</span>
+<span class="text-text-tertiary">•</span>
+<span>Friday, September 11</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md flex-wrap">
+<div class="flex items-center gap-2 px-space-md py-2 rounded-xl bg-surface-elevated/80 shadow-inner">
+<span class="material-symbols-outlined text-primary-fixed text-[18px]">schedule</span>
+<span class="font-label-mono-sm text-label-mono-sm text-text-primary font-semibold tracking-wider">21:54</span>
+<span class="font-label-mono-xs text-label-mono-xs text-secondary-fixed bg-secondary-container/20 px-1.5 py-0.5 rounded">WIB</span>
+</div>
+<div class="flex items-center gap-2 px-space-md py-2 rounded-xl bg-surface-elevated/80 shadow-inner">
+<span class="w-2 h-2 rounded-full bg-status-success animate-pulse"></span>
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-text-secondary tracking-widest">COGNITIVE LATENCY: 12ms</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Primary Metric Grid: High Conviction Obsidian Surface -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+<!-- Net Worth Konsolidasi -->
+<div class="group relative rounded-xl bg-surface-card/65 p-space-lg backdrop-blur-2xl shadow-xl hover:bg-surface-card/85 transition-all flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-text-tertiary tracking-wider">NET WORTH KONSOLIDASI</span>
+<span class="font-label-mono-xs text-label-mono-xs text-text-secondary">CROSS-EXCHANGE LEDGER</span>
+</div>
+<div class="flex items-center gap-1 rounded-lg bg-surface-elevated p-1 shadow-inner">
+<span class="px-2 py-0.5 rounded font-label-mono-xs text-label-mono-xs text-primary-fixed bg-surface-charcoal font-semibold">IDR</span>
+<span class="material-symbols-outlined text-[14px] text-text-tertiary">sync_alt</span>
+<span class="px-2 py-0.5 rounded font-label-mono-xs text-label-mono-xs text-text-tertiary hover:text-on-surface">USD</span>
+</div>
+</div>
+<div class="mt-space-md flex flex-col">
+<span class="font-headline-lg text-headline-lg font-bold text-text-primary tracking-tight">Rp 68.000.000</span>
+<div class="flex items-center gap-space-sm mt-1">
+<span class="inline-flex items-center gap-0.5 font-label-mono-xs text-label-mono-xs text-status-critical font-semibold bg-error-container/20 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[12px]">trending_down</span> -96.60% MTD
+          </span>
+<span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">≈ $4,250.00 USD</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm flex items-center justify-between font-label-mono-xs text-label-mono-xs text-text-tertiary">
+<span>COLD STORAGE: 82%</span>
+<span class="text-primary-fixed">ALLOCATED</span>
+</div>
+</div>
+<!-- Cash Flow This Month -->
+<div class="relative rounded-xl bg-surface-card/65 p-space-lg backdrop-blur-2xl shadow-xl flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-text-tertiary tracking-wider">CASH FLOW</span>
+<span class="font-label-mono-xs text-label-mono-xs text-text-secondary">THIS MONTH // POSITIVE</span>
+</div>
+<div class="p-1.5 rounded-xl bg-secondary/10">
+<span class="material-symbols-outlined text-secondary text-[20px]">arrow_outward</span>
+</div>
+</div>
+<div class="mt-space-md flex flex-col">
+<span class="font-headline-lg text-headline-lg font-bold text-secondary tracking-tight">Rp 16.000.000</span>
+<div class="flex items-center gap-space-sm mt-1">
+<span class="inline-flex items-center gap-0.5 font-label-mono-xs text-label-mono-xs text-status-success font-semibold bg-secondary/15 px-1.5 py-0.5 rounded">
+            +31.4% OVER BURN RATE
+          </span>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm flex items-center justify-between font-label-mono-xs text-label-mono-xs text-text-tertiary">
+<span>NET INFLOW ACTIVE</span>
+<span class="text-secondary font-semibold">OPTIMAL</span>
+</div>
+</div>
+<!-- Expenses This Month -->
+<div class="relative rounded-xl bg-surface-card/65 p-space-lg backdrop-blur-2xl shadow-xl flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-text-tertiary tracking-wider">EXPENSES</span>
+<span class="font-label-mono-xs text-label-mono-xs text-text-secondary">OPERATIONAL RUNWAY</span>
+</div>
+<div class="p-1.5 rounded-xl bg-accent-orange/10">
+<span class="material-symbols-outlined text-accent-orange text-[20px]">south_east</span>
+</div>
+</div>
+<div class="mt-space-md flex flex-col">
+<span class="font-headline-lg text-headline-lg font-bold text-accent-orange tracking-tight">Rp 11.000.000</span>
+<div class="flex items-center gap-space-sm mt-1">
+<span class="inline-flex items-center gap-0.5 font-label-mono-xs text-label-mono-xs text-accent-orange font-semibold bg-accent-orange/15 px-1.5 py-0.5 rounded">
+            CAP: Rp 15.000.000
+          </span>
+<span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">73% UTILIZED</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm flex items-center justify-between font-label-mono-xs text-label-mono-xs text-text-tertiary">
+<span>SAFETY BUFFER</span>
+<span class="text-status-success font-semibold">PROTECTED</span>
+</div>
+</div>
+</div>
+<!-- Secondary Row: Performance Ratios & Composure Dial -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-space-md">
+<div class="rounded-xl bg-surface-elevated/70 p-space-md backdrop-blur-xl shadow-lg flex flex-col justify-between">
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-text-tertiary">TRADING P&amp;L (MTD)</span>
+<div class="my-1">
+<span class="font-metric-val-lg text-metric-val-lg font-bold text-primary-fixed">+$24,180.50</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span>
+<span class="font-label-mono-xs text-label-mono-xs text-primary font-medium">+18.4% Alpha</span>
+</div>
+</div>
+<div class="rounded-xl bg-surface-elevated/70 p-space-md backdrop-blur-xl shadow-lg flex flex-col justify-between">
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-text-tertiary">WIN RATE</span>
+<div class="my-1">
+<span class="font-metric-val-lg text-metric-val-lg font-bold text-text-primary">74.2%</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>
+<span class="font-label-mono-xs text-label-mono-xs text-status-success font-medium">37 Wins / 13 Loss</span>
+</div>
+</div>
+<div class="rounded-xl bg-surface-elevated/70 p-space-md backdrop-blur-xl shadow-lg flex flex-col justify-between">
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-text-tertiary">PROFIT FACTOR</span>
+<div class="my-1">
+<span class="font-metric-val-lg text-metric-val-lg font-bold text-text-primary">1.85</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span>
+<span class="font-label-mono-xs text-label-mono-xs text-text-secondary">Threshold &gt; 1.50</span>
+</div>
+</div>
+<div class="rounded-xl bg-surface-elevated/70 p-space-md backdrop-blur-xl shadow-lg flex flex-col justify-between">
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-text-tertiary">MAX DRAWDOWN</span>
+<div class="my-1">
+<span class="font-metric-val-lg text-metric-val-lg font-bold text-text-primary">-0.0%</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-mono-xs text-label-mono-xs text-secondary">Optimal Risk Profile</span>
+</div>
+</div>
+</div>
+<!-- Central Analytical Hub: Chart + Discipline Engine Split -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Equity & Cash Flow Visualizer (8 cols) -->
+<div class="lg:col-span-8 rounded-xl bg-surface-card/70 p-space-lg backdrop-blur-2xl shadow-xl flex flex-col justify-between">
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm mb-space-md">
+<div class="flex items-center gap-space-md">
+<button class="px-3 py-1 rounded-lg bg-surface-elevated font-headline-sm text-body-sm text-text-primary font-semibold shadow-inner">
+            CASH FLOW <span class="text-text-tertiary font-label-mono-xs">(3)</span>
+</button>
+<button class="px-3 py-1 rounded-lg font-headline-sm text-body-sm text-text-tertiary hover:text-on-surface transition-colors">
+            TRADING EQUITY <span class="text-text-tertiary font-label-mono-xs">(0)</span>
+</button>
+</div>
+<!-- Interval Selectors -->
+<div class="flex items-center bg-surface-elevated p-1 rounded-xl shadow-inner font-label-mono-xs text-label-mono-xs">
+<button class="px-2.5 py-1 rounded-lg text-text-tertiary hover:text-on-surface">7D</button>
+<button class="px-2.5 py-1 rounded-lg bg-surface-charcoal text-primary-fixed font-semibold">30D</button>
+<button class="px-2.5 py-1 rounded-lg text-text-tertiary hover:text-on-surface">3M</button>
+<button class="px-2.5 py-1 rounded-lg text-text-tertiary hover:text-on-surface">6M</button>
+<button class="px-2.5 py-1 rounded-lg text-text-tertiary hover:text-on-surface">1Y</button>
+</div>
+</div>
+<!-- Progression Subtitle & Peak Label -->
+<div class="flex items-center justify-between mb-space-xs font-label-mono-xs text-label-mono-xs">
+<span class="text-text-tertiary uppercase tracking-wider">Net Cash Flow Progression (30D)</span>
+<div class="flex items-center gap-1 text-primary-fixed font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed animate-ping"></span>
+<span>Current: Rp 16.000.000</span>
+</div>
+</div>
+<!-- Interactive SVG Chart with Ambient Neon Gradient Fill -->
+<div class="relative w-full h-72 rounded-xl bg-surface-elevated/40 p-space-sm overflow-hidden flex flex-col justify-end">
+<svg class="w-full h-full" fill="none" preserveaspectratio="none" viewbox="0 0 700 240">
+<defs>
+<lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#00F2C2" stop-opacity="0.32"></stop>
+<stop offset="65%" stop-color="#00F2C2" stop-opacity="0.08"></stop>
+<stop offset="100%" stop-color="#00F2C2" stop-opacity="0"></stop>
+</lineargradient>
+<lineargradient id="lineGlow" x1="0" x2="1" y1="0" y2="0">
+<stop offset="0%" stop-color="#4EDEA3"></stop>
+<stop offset="50%" stop-color="#00E0B4"></stop>
+<stop offset="100%" stop-color="#00F2C2"></stop>
+</lineargradient>
+</defs>
+<!-- Horizontal Soft Grid Lines -->
+<line stroke="rgba(255,255,255,0.04)" stroke-dasharray="4 4" x1="0" x2="700" y1="40" y2="40"></line>
+<line stroke="rgba(255,255,255,0.04)" stroke-dasharray="4 4" x1="0" x2="700" y1="100" y2="100"></line>
+<line stroke="rgba(255,255,255,0.04)" stroke-dasharray="4 4" x1="0" x2="700" y1="160" y2="160"></line>
+<line stroke="rgba(255,255,255,0.04)" stroke-dasharray="4 4" x1="0" x2="700" y1="210" y2="210"></line>
+<!-- Filled Vector Area -->
+<polygon fill="url(#chartGradient)" points="40,165 180,185 340,210 490,170 630,95 630,230 40,230"></polygon>
+<!-- Neon Trajectory Line -->
+<polyline fill="none" points="40,165 180,185 340,210 490,170 630,95" stroke="url(#lineGlow)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></polyline>
+<!-- Key Diagnostic Nodes -->
+<circle cx="40" cy="165" fill="#121920" r="4" stroke="#4EDEA3" stroke-width="2"></circle>
+<circle cx="180" cy="185" fill="#121920" r="4" stroke="#4EDEA3" stroke-width="2"></circle>
+<circle cx="340" cy="210" fill="#121920" r="5" stroke="#00F2C2" stroke-width="2.5"></circle>
+<circle cx="490" cy="170" fill="#121920" r="4" stroke="#00F2C2" stroke-width="2"></circle>
+<circle cx="630" cy="95" fill="#00F2C2" r="6" stroke="#080B0E" stroke-width="2"></circle>
+</svg>
+<!-- Floating Data Coordinate Tooltip Badge -->
+<div class="absolute top-10 right-16 px-space-md py-1.5 rounded-xl bg-surface-elevated/90 backdrop-blur-md shadow-2xl flex items-center gap-2">
+<span class="font-label-mono-xs text-label-mono-xs text-text-secondary">PROFIT PEAK</span>
+<span class="font-label-mono-sm text-label-mono-sm text-primary-fixed font-bold">+$24,180.50</span>
+<span class="text-secondary font-label-mono-xs text-label-mono-xs font-semibold">+23.00%</span>
+</div>
+</div>
+<!-- Chart Min/Max Axis Info -->
+<div class="flex items-center justify-between pt-space-sm font-label-mono-xs text-label-mono-xs text-text-tertiary">
+<span>Min: Rp -11.000</span>
+<span>Baseline Mean: Rp 8.420.000</span>
+<span>Max: Rp 16.000.000</span>
+</div>
+</div>
+<!-- Psychology Audit & Composure Gauge (4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-space-lg">
+<!-- Discipline Dial Glass Card -->
+<div class="rounded-xl bg-surface-card/70 p-space-lg backdrop-blur-2xl shadow-xl flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-sm font-semibold text-text-primary">Discipline Score</span>
+<span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">RULE ENGINE MONITOR</span>
+</div>
+<span class="material-symbols-outlined text-text-tertiary text-[18px]">verified_user</span>
+</div>
+<div class="flex items-center justify-center my-space-md">
+<div class="relative w-36 h-36 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<circle cx="50" cy="50" fill="none" r="40" stroke="rgba(255,255,255,0.08)" stroke-width="8"></circle>
+<circle cx="50" cy="50" fill="none" r="40" stroke="#00F2C2" stroke-dasharray="251.2" stroke-dashoffset="32.6" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute flex flex-col items-center justify-center">
+<span class="font-headline-lg text-headline-lg font-bold text-text-primary">87<span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">/100</span></span>
+<span class="font-label-mono-xs text-label-mono-xs text-secondary-fixed uppercase font-semibold">OPTIMAL</span>
+</div>
+</div>
+</div>
+<div class="p-space-sm rounded-xl bg-surface-elevated/70 flex items-center justify-between font-label-mono-xs text-label-mono-xs">
+<span class="text-text-secondary">Execution Confidence</span>
+<span class="text-primary-fixed font-semibold">TOP 3.2% TILED</span>
+</div>
+</div>
+<!-- AI Psychology Audit Box -->
+<div class="rounded-xl bg-surface-card/70 p-space-lg backdrop-blur-2xl shadow-xl flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-body-sm font-semibold text-text-primary">AI Psychology Audit</span>
+<button class="text-text-tertiary hover:text-on-surface">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-sm my-space-sm">
+<div>
+<div class="flex items-center justify-between font-label-mono-xs text-label-mono-xs mb-1">
+<span class="text-text-secondary">Revenge Trading Risk</span>
+<span class="text-status-critical font-semibold">-32% (Low)</span>
+</div>
+<div class="w-full h-1.5 bg-surface-elevated rounded-full overflow-hidden">
+<div class="h-full w-1/3 bg-status-critical rounded-full"></div>
+</div>
+</div>
+<div>
+<div class="flex items-center justify-between font-label-mono-xs text-label-mono-xs mb-1">
+<span class="text-text-secondary">Holding Losers Past Stop</span>
+<span class="text-accent-orange font-semibold">-$1,832 Tax</span>
+</div>
+<div class="w-full h-1.5 bg-surface-elevated rounded-full overflow-hidden">
+<div class="h-full w-2/5 bg-accent-orange rounded-full"></div>
+</div>
+</div>
+</div>
+<button class="w-full py-2 rounded-xl bg-surface-elevated hover:bg-surface-elevated/80 font-label-mono-xs text-label-mono-xs text-text-primary font-semibold tracking-wider transition-colors">
+          LEARN MORE &amp; AUDIT
+        </button>
+</div>
+</div>
+</div>
+<!-- Bottom Workspace: Recent Activity Ledger & Economic Radar -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Recent Activity Ledger (5 cols) -->
+<div class="lg:col-span-5 rounded-xl bg-surface-card/70 p-space-lg backdrop-blur-2xl shadow-xl flex flex-col justify-between">
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex flex-col">
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-text-tertiary tracking-wider">RECENT ACTIVITY</span>
+<span class="font-headline-sm text-body-sm font-semibold text-text-primary">Ledger Entries</span>
+</div>
+<span class="material-symbols-outlined text-text-tertiary text-[18px]">receipt_long</span>
+</div>
+<div class="flex flex-col gap-space-sm divide-y divide-transparent my-space-xs">
+<!-- Entry 1 -->
+<div class="flex items-center justify-between py-2.5 px-3 rounded-xl bg-surface-elevated/40 hover:bg-surface-elevated/70 transition-all">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">07:00</span>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-text-primary font-medium">Saku Deposit</span>
+<span class="font-label-mono-xs text-label-mono-xs text-secondary-fixed">INSTANT VAULT</span>
+</div>
+</div>
+<span class="font-label-mono-sm text-label-mono-sm text-status-success font-semibold">+Rp 12.000.000</span>
+</div>
+<!-- Entry 2 -->
+<div class="flex items-center justify-between py-2.5 px-3 rounded-xl bg-surface-elevated/40 hover:bg-surface-elevated/70 transition-all">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">07:00</span>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-text-primary font-medium">Saku Allocation</span>
+<span class="font-label-mono-xs text-label-mono-xs text-secondary-fixed">STABLE RECURRING</span>
+</div>
+</div>
+<span class="font-label-mono-sm text-label-mono-sm text-status-success font-semibold">+Rp 15.000.000</span>
+</div>
+<!-- Entry 3 -->
+<div class="flex items-center justify-between py-2.5 px-3 rounded-xl bg-surface-elevated/40 hover:bg-surface-elevated/70 transition-all">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">07:00</span>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-text-primary font-medium">Token Ai Sub</span>
+<span class="font-label-mono-xs text-label-mono-xs text-status-critical">API COMPUTE EXPENDITURE</span>
+</div>
+</div>
+<span class="font-label-mono-sm text-label-mono-sm text-accent-orange font-semibold">-Rp 11.000.000</span>
+</div>
+</div>
+<div class="pt-space-xs flex items-center justify-between font-label-mono-xs text-label-mono-xs text-text-tertiary">
+<span>3 OF 142 SYNCED TRANSACTIONS</span>
+<button class="text-primary-fixed hover:underline flex items-center gap-0.5">VIEW ALL <span class="material-symbols-outlined text-[14px]">chevron_right</span></button>
+</div>
+</div>
+<!-- Fynence Pulse & Economic Radar (7 cols) -->
+<div class="lg:col-span-7 rounded-xl bg-surface-card/70 p-space-lg backdrop-blur-2xl shadow-xl flex flex-col justify-between">
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="w-2 h-2 rounded-full bg-status-warning animate-pulse"></span>
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-text-primary tracking-widest font-semibold">FYNENCE PULSE // ECONOMIC RADAR</span>
+<span class="font-label-mono-xs text-label-mono-xs bg-surface-elevated px-2 py-0.5 rounded text-text-secondary">Curated Feed</span>
+</div>
+<button class="flex items-center gap-1 font-label-mono-xs text-label-mono-xs text-primary-fixed hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">sync</span>
+<span>Sync Pulse</span>
+</button>
+</div>
+<!-- Main Pulse Curated Headline Container -->
+<div class="p-space-md rounded-xl bg-surface-elevated/60 shadow-inner flex flex-col gap-space-sm my-space-xs">
+<div class="flex items-center justify-between flex-wrap gap-2">
+<div class="flex items-center gap-space-xs font-label-mono-xs text-label-mono-xs">
+<span class="text-primary-fixed uppercase font-semibold">● TOP HEADLINE // DAILYMAIL.COM</span>
+<span class="text-text-tertiary">• Inflation &amp; Prices</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 rounded bg-error-container/20 text-status-critical font-label-mono-xs text-label-mono-xs font-semibold">HIGH IMPACT</span>
+<span class="px-2 py-0.5 rounded bg-accent-orange/20 text-accent-orange font-label-mono-xs text-label-mono-xs font-semibold">● BEARISH</span>
+<span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">1d ago</span>
+</div>
+</div>
+<h3 class="font-headline-sm text-body-lg font-bold text-text-primary leading-snug">
+          Stocks plunge as Iran war sends oil above $100... and 'toxic cocktail' threatens gas, groceries and household bills
+        </h3>
+<p class="font-body-sm text-body-sm text-text-secondary line-clamp-2">
+          The endless regional tension is undercutting equities and pushing energy benchmarks through the ceiling once again, heightening cross-asset downside tail risk.
+        </p>
+<!-- Target Asset Pill Ticker -->
+<div class="flex items-center justify-between pt-1 flex-wrap gap-2">
+<div class="flex items-center gap-1.5 font-label-mono-xs text-label-mono-xs">
+<span class="text-text-tertiary">Key Assets:</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-charcoal text-text-primary">USD</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-charcoal text-text-primary">Gold</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-charcoal text-text-primary">US 10Y</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-charcoal text-text-primary">S&amp;P 500</span>
+</div>
+<a class="font-label-mono-xs text-label-mono-xs text-primary-fixed hover:underline flex items-center gap-1" href="#">
+            Read original wire <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- AI Cognition Analysis Callout Box -->
+<div class="p-space-md rounded-xl bg-surface-elevated/40 flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="p-2 rounded-xl bg-primary-container/10 text-primary-fixed">
+<span class="material-symbols-outlined text-[20px]">neurology</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-mono-xs text-label-mono-xs text-primary-fixed uppercase font-semibold">AI MARKET IMPACT // COGNITION ENGINE</span>
+<p class="font-body-sm text-body-sm text-text-secondary">
+              Commodity volatility divergence detected. Keep leverage sub-3x on high-beta equity spreads.
+            </p>
+</div>
+</div>
+<span class="font-label-mono-xs text-label-mono-xs text-text-tertiary shrink-0">Gemini 1.5 Pro</span>
+</div>
+</div>
+</div>
+<!-- Ambient Floating Companion Glass Widgets (From Vision Pro Aesthetic) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<div class="rounded-xl bg-surface-card/60 p-space-md backdrop-blur-2xl shadow-xl flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-xl bg-surface-elevated flex items-center justify-center text-primary-fixed">
+<span class="material-symbols-outlined text-[22px]">currency_bitcoin</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-text-primary font-semibold">Crypto Holdings Overview</span>
+<span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">ETNO / BTC COLD VAULT</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-mono-sm text-label-mono-sm font-bold text-text-primary">$28,080.00</span>
+<span class="font-label-mono-xs text-label-mono-xs text-status-success font-semibold">+2.52% TODAY</span>
+</div>
+</div>
+<div class="rounded-xl bg-surface-card/60 p-space-md backdrop-blur-2xl shadow-xl flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-xl bg-surface-elevated flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">currency_exchange</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-text-primary font-semibold">Forex Liquidity Nodes</span>
+<span class="font-label-mono-xs text-label-mono-xs text-text-tertiary">GBP/USD &amp; EUR/USD SWAPS</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-mono-sm text-label-mono-sm font-bold text-text-primary">$51,050.00</span>
+<span class="font-label-mono-xs text-label-mono-xs text-status-success font-semibold">+1.32% LIQ</span>
+</div>
+</div>
+</div>
+</div></main></div></body></html>

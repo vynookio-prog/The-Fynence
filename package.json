@@ -1,0 +1,40 @@
+{
+  "name": "vyno-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint",
+    "postinstall": "node -e \"const fs=require('fs'),p='./node_modules/@insforge/shared-schemas/package.json';if(fs.existsSync(p)){const pkg=JSON.parse(fs.readFileSync(p,'utf8'));pkg.exports['.']['default']='./dist/index.js';pkg.exports['.']['require']='./dist/index.js';fs.writeFileSync(p,JSON.stringify(pkg,null,2));}\""
+  },
+  "dependencies": {
+    "@insforge/sdk": "^1.5.2",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.42.0",
+    "next": "16.3.4",
+    "pdf-lib": "^1.17.1",
+    "python": "^0.0.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-router-dom": "^7.18.4",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4",
+    "jsdom": "^29.1.1",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vite": "^8.3.1"
+  }
+}
