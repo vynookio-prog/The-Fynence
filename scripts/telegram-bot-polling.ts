@@ -4,8 +4,8 @@ if (typeof process !== 'undefined' && typeof process.loadEnvFile === 'function')
   } catch {}
 }
 
-import { TelegramBotController } from '../src/telegram/controller/telegramBotController';
-import { getTelegramConfig, validateTelegramConfig } from '../src/telegram/config/telegramConfig';
+import { TelegramBotController } from '../src/fynence/telegram/controller/telegramBotController';
+import { getTelegramConfig, validateTelegramConfig } from '../src/fynence/telegram/config/telegramConfig';
 
 async function startLocalBot() {
   const config = getTelegramConfig();

@@ -1,9 +1,9 @@
-import { EditionPipelineService } from '../src/telegram/service/editionPipelineService';
-import { WeatherService } from '../src/weather/service/weatherService';
-import { MarketService } from '../src/market/service/marketService';
-import { EditionComposer } from '../src/composer/editionComposer';
-import { NewspaperRenderer } from '../src/renderer/service/newspaperRenderer';
-import { PdfRenderer } from '../src/pdf/service/pdfRenderer';
+import { EditionPipelineService } from '../src/fynence/telegram/service/editionPipelineService';
+import { WeatherService } from '../src/fynence/weather/service/weatherService';
+import { MarketService } from '../src/fynence/market/service/marketService';
+import { EditionComposer } from '../src/fynence/composer/editionComposer';
+import { NewspaperRenderer } from '../src/fynence/renderer/service/newspaperRenderer';
+import { PdfRenderer } from '../src/fynence/pdf/service/pdfRenderer';
 import { promises as fs, existsSync } from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';

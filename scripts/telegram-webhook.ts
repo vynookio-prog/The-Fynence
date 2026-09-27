@@ -5,7 +5,7 @@ if (typeof process !== 'undefined' && typeof process.loadEnvFile === 'function')
 }
 
 import { Bot } from 'grammy';
-import { getTelegramConfig, validateTelegramConfig } from '../src/telegram/config/telegramConfig';
+import { getTelegramConfig, validateTelegramConfig } from '../src/fynence/telegram/config/telegramConfig';
 
 async function main() {
   const action = process.argv[2] || 'info';
