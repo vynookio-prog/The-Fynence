@@ -10,6 +10,14 @@ export interface FynenceEnvironmentConfig {
   nodeEnv: string;
 }
 
+if (typeof process !== 'undefined' && typeof process.loadEnvFile === 'function') {
+  try {
+    process.loadEnvFile();
+  } catch {
+    // Ignore error if .env does not exist or was already loaded
+  }
+}
+
 function readEnvVar(key: string): string | undefined {
   if (typeof process !== 'undefined' && process.env && process.env[key]) {
     return process.env[key];

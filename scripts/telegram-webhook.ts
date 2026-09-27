@@ -1,3 +1,9 @@
+if (typeof process !== 'undefined' && typeof process.loadEnvFile === 'function') {
+  try {
+    process.loadEnvFile();
+  } catch {}
+}
+
 import { Bot } from 'grammy';
 import { getTelegramConfig, validateTelegramConfig } from '../src/telegram/config/telegramConfig';
 
