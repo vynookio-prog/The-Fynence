@@ -8,7 +8,7 @@ const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
 export class GeminiProvider implements AIProvider {
   public readonly name = 'gemini';
-  public readonly defaultModel = 'gemini-2.5-flash';
+  public readonly defaultModel = 'gemini-3.8-flash';
 
   private apiKey: string;
   private apiBaseUrl: string;

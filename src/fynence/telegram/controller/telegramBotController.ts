@@ -332,7 +332,7 @@ export class TelegramBotController {
       // 8. Send sources button or completion notice
       if (result.sources.length > 0) {
         await ctx.reply('🗞️ Press below to inspect citations and verified sources:', {
-          reply_markup: createSourcesKeyboard(result.sources.length),
+          reply_markup: createSourcesKeyboard(result.sources.length, result.sources),
         });
       }
     } catch (err) {

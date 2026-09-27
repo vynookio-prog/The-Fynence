@@ -32,12 +32,22 @@ export interface NewsSource {
   updatedAt: string;
 }
 
+export type LinkStatus = 'VALID' | 'REDIRECTED' | 'PAYWALLED' | 'BLOCKED' | 'BROKEN' | 'UNKNOWN';
+
 export interface Article {
   id: string;
   title: string;
+  headline?: string;
+  subheadline?: string;
+  whatHappened?: string;
+  details?: string;
+  whyItMatters?: string;
   description: string;
   content?: string;
   url: string;
+  originalUrl: string;
+  resolvedUrl?: string;
+  linkStatus?: LinkStatus;
   source: string;
   sourceId?: string;
   author: string | null;
@@ -47,6 +57,11 @@ export interface Article {
   imageUrl: string | null;
   imageSource: string | null;
   imageCredit: string | null;
+  imageWidth?: number;
+  imageHeight?: number;
+  imageMimeType?: string;
+  imageAssetBuffer?: Buffer;
+  imageAssetDataUri?: string;
   imageUsageStatus: ImageUsageStatus;
   imageMetadata?: ImageMetadata;
   createdAt: string;

@@ -37,7 +37,8 @@ export function cleanAuthor(rawAuthor?: string): string | null {
 
 export class NewsNormalizer {
   public normalize(item: ParsedNewsItem, source: NewsSourceConfig): Article {
-    const canonicalUrl = normalizeCanonicalUrl(item.link);
+    const rawLink = (item.link || '').trim();
+    const canonicalUrl = normalizeCanonicalUrl(rawLink);
     const cleanedTitle = cleanHeadline(item.title);
     const cleanedDesc = decodeHtmlEntities(stripHtmlTags(item.description || ''));
     const isoDate = normalizeDateToIso(item.pubDate);
@@ -59,7 +60,10 @@ export class NewsNormalizer {
       title: cleanedTitle,
       description: cleanedDesc,
       content: item.content ? decodeHtmlEntities(item.content) : undefined,
-      url: canonicalUrl,
+      url: rawLink || canonicalUrl,
+      originalUrl: rawLink || canonicalUrl,
+      resolvedUrl: rawLink || canonicalUrl,
+      linkStatus: 'UNKNOWN',
       source: source.name,
       sourceId: source.id,
       author,

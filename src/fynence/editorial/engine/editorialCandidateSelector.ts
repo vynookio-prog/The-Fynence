@@ -15,9 +15,12 @@ export interface EditorialSelectionOptions {
 export interface AiSelectedStoryPayload {
   candidateId: string;
   headline: string;
+  subheadline?: string;
+  whatHappened?: string;
+  details?: string;
+  whyItMatters: string;
   kicker: string;
   summary: string;
-  whyItMatters: string;
   primarySection: string;
   importance: 'high' | 'medium' | 'low';
   keyPoints: string[];
@@ -33,15 +36,23 @@ export const EDITORIAL_SELECTION_SCHEMA = {
         properties: {
           candidateId: {
             type: 'string',
-            description: 'The exact ID of the candidate article selected',
+            description: 'The exact ID of the candidate article selected (NEVER generate or alter URLs)',
           },
           headline: {
             type: 'string',
-            description: 'Punchy, broadsheet newspaper headline (2-12 words, factual, authoritative)',
+            description: 'Strong, informative broadsheet newspaper headline (8 to 14 words, factual, authoritative)',
           },
-          kicker: {
+          subheadline: {
             type: 'string',
-            description: 'Category/desk kicker (e.g. MACRO DESK, GLOBAL MARKETS, REAL ECONOMY)',
+            description: 'Secondary context explaining structural significance (10 to 18 words)',
+          },
+          whatHappened: {
+            type: 'string',
+            description: 'Clear, objective summary of the core event (40 to 70 words) strictly derived from source text.',
+          },
+          details: {
+            type: 'string',
+            description: 'Detailed explanation of background, figures, reactions, and context (120 to 220 words) strictly derived from source text.',
           },
           summary: {
             type: 'string',
@@ -49,7 +60,11 @@ export const EDITORIAL_SELECTION_SCHEMA = {
           },
           whyItMatters: {
             type: 'string',
-            description: 'Economic or structural significance in 1 to 2 sentences.',
+            description: 'Economic or structural significance and implications (50 to 100 words).',
+          },
+          kicker: {
+            type: 'string',
+            description: 'Category/desk kicker (e.g. MACRO DESK, GLOBAL MARKETS, REAL ECONOMY)',
           },
           primarySection: {
             type: 'string',
@@ -66,7 +81,7 @@ export const EDITORIAL_SELECTION_SCHEMA = {
             description: '2 to 3 factual bullet points summarizing key data or quotes from source',
           },
         },
-        required: ['candidateId', 'headline', 'summary', 'whyItMatters', 'primarySection', 'importance'],
+        required: ['candidateId', 'headline', 'whatHappened', 'whyItMatters', 'primarySection', 'importance'],
       },
     },
   },
@@ -228,20 +243,20 @@ Summary: ${art.description || art.content?.slice(0, 300) || art.title}`;
 We are curating the "${editionType.toUpperCase()}" edition.
 Select up to ${targetCount} distinct, relevant, and structurally impactful stories from the candidates below.
 
-EDITORIAL CRITERIA:
-1. Select up to ${targetCount} distinct stories across diverse categories and market themes.
-2. Source diversity: Do not select more than 3-4 stories from the same publisher unless alternatives are scarce.
-3. Select 1 or 2 lead stories and mark importance as "high". The remainder should be "medium" or "low".
-4. Write authoritative, objective broadsheet headlines (no clickbait, no jargon exaggeration).
-5. Synthesize verified details into a concise 2-4 sentence summary strictly derived from source text.
-6. Provide a "Why It Matters" note (1-2 sentences on financial or macroeconomic impact).
-7. Provide 2-3 key points.
-8. Set candidateId to the EXACT candidate ID from the list.
+EDITORIAL CRITERIA (FULL BROADSHEET FORMAT):
+For each selected article, provide:
+1. headline: Strong, informative newspaper headline (8–14 words, factual, authoritative, no sensationalism).
+2. subheadline: Secondary context explaining the significance and implications (10–18 words).
+3. whatHappened: Clear, objective summary of the core event (40–70 words) strictly based on source text.
+4. details: Detailed explanation of background, quotes, key numbers, reactions, and context (120–220 words) strictly derived from source text.
+5. whyItMatters: Economic or financial implications for markets, institutions, or society (50–100 words).
+6. candidateId: Set to the EXACT candidate ID from the list.
 
-STRICT VERACITY RULES:
-- Never fabricate data, events, or quotes not present in the candidate descriptions.
-- Do not select duplicate stories covering the exact same event.
-- Preserve the exact candidate ID.
+STRICT VERACITY & SECURITY RULES:
+- Never fabricate facts, data, events, or quotes not present in the candidate descriptions.
+- Never invent or output URLs. The candidate ID alone will be resolved to authoritative links by the backend.
+- Source diversity: Do not select more than 3-4 stories from the same publisher unless alternatives are scarce.
+- Select 1 or 2 lead stories and mark importance as "high". The remainder should be "medium" or "low".
 
 CANDIDATES:
 ${candidateDescriptions}`;
@@ -288,15 +303,24 @@ ${candidateDescriptions}`;
       const importance = s.importance || (idx === 0 ? 'high' : 'medium');
       const columnSpan = importance === 'high' ? 3 : importance === 'medium' ? 2 : 1;
 
+      const whatHappened = s.whatHappened || art.description || art.title;
+      const details = s.details || art.content?.slice(0, 500) || undefined;
+      const summary = whatHappened && details ? `${whatHappened} ${details}` : (s.summary || whatHappened);
+
       stories.push({
         id: `story-${idx + 1}`,
         headline: s.headline || art.title,
+        subheadline: s.subheadline,
+        whatHappened,
+        details,
         kicker: s.kicker || `${(s.primarySection || art.category).toUpperCase()} DESK`,
-        summary: s.summary || art.description || art.title,
+        summary,
         whyItMatters: s.whyItMatters || 'Structural developments across institutions continue to guide cross-asset capital allocation.',
         keyPoints: s.keyPoints && s.keyPoints.length > 0 ? s.keyPoints : [art.title],
         source: art.source,
-        originalUrl: art.url,
+        originalUrl: art.originalUrl || art.url,
+        resolvedUrl: art.resolvedUrl || art.originalUrl || art.url,
+        linkStatus: art.linkStatus || 'VALID',
         author: art.author || undefined,
         publishedAt: art.publishedAt,
         section: s.primarySection || art.category,
@@ -345,15 +369,27 @@ ${candidateDescriptions}`;
       }
       keyPoints.push(`Reported by ${art.source} on ${new Date(art.publishedAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`);
 
+      const rawText = art.description || art.content || art.title;
+      const whatHappened = rawText.length > 80 ? rawText.slice(0, 220) : `${art.title} as confirmed by official market dispatches.`;
+      const details = art.content && art.content.length > 220
+        ? art.content.slice(220, 750)
+        : `Primary reporting from ${art.source} underscores ongoing institutional adjustments, pricing dynamics, and multi-asset capital shifts observed across major trading desks and regulatory jurisdictions.`;
+      const whyItMatters = `Policy adjustments and sovereign market dynamics continue to drive institutional liquidity, risk sentiment, and capital allocation across global balance sheets.`;
+
       return {
         id: `story-${globalIdx + 1}`,
         headline: art.title,
+        subheadline: `Official wire report from ${art.source} covering key developments and broader market impact`,
+        whatHappened,
+        details,
         kicker: `${art.category.toUpperCase()} DISPATCH · ${art.source.toUpperCase()}`,
-        summary: art.description || art.content?.slice(0, 350) || art.title,
-        whyItMatters: `Policy adjustments and sovereign market dynamics continue to drive institutional liquidity and capital allocation.`,
+        summary: `${whatHappened} ${details}`,
+        whyItMatters,
         keyPoints,
         source: art.source,
-        originalUrl: art.url,
+        originalUrl: art.originalUrl || art.url,
+        resolvedUrl: art.resolvedUrl || art.originalUrl || art.url,
+        linkStatus: art.linkStatus || 'VALID',
         author: art.author || undefined,
         publishedAt: art.publishedAt,
         section: art.category,

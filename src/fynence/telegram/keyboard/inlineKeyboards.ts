@@ -1,5 +1,5 @@
 import { InlineKeyboard } from 'grammy';
-import type { TelegramFormatOption } from '../types';
+import type { TelegramArticleSourceItem, TelegramFormatOption } from '../types';
 
 export function createStartMenuKeyboard(): InlineKeyboard {
   return new InlineKeyboard()
@@ -21,8 +21,19 @@ export function createFormatSelectionKeyboard(editionKey: string): InlineKeyboar
     .text('🖼️ + 📄 Both', `format:both:${editionKey}`);
 }
 
-export function createSourcesKeyboard(articleCount: number): InlineKeyboard {
+export function createSourcesKeyboard(
+  articleCount: number,
+  topSources?: TelegramArticleSourceItem[]
+): InlineKeyboard {
   const keyboard = new InlineKeyboard();
+  if (topSources && topSources.length > 0) {
+    for (const src of topSources.slice(0, 2)) {
+      if (src.articleUrl && (src.articleUrl.startsWith('http://') || src.articleUrl.startsWith('https://'))) {
+        const shortTitle = src.headline.length > 28 ? `${src.headline.substring(0, 27)}…` : src.headline;
+        keyboard.url(`📰 Read: ${shortTitle}`, src.articleUrl).row();
+      }
+    }
+  }
   if (articleCount > 0) {
     keyboard.text('🔗 View Article Sources', 'action:sources');
   }

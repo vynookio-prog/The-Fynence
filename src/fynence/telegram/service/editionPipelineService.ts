@@ -9,6 +9,9 @@ import { MarketService } from '../../market/service/marketService';
 import { MockMarketDataProvider } from '../../market/providers/mockMarketProvider';
 import { NewsIngestionService, newsIngestionService } from '../../engine/ingestion/newsIngestionService';
 import { formatNewspaperDateLong } from '../../weather/utils/timezone';
+import { imagePipelineService } from '../../image/imagePipelineService';
+import { urlResolver } from '../../engine/url/urlResolver';
+import { logArticleDiagnostics } from '../../engine/observability/articleDiagnostics';
 
 export type ProgressCallback = (statusText: string) => Promise<void>;
 
@@ -179,6 +182,40 @@ export class EditionPipelineService {
         theme: request.theme || 'retro_black_cream',
       });
 
+      // Extract all stories from doc
+      const allDocStories: NewspaperStory[] = [];
+      for (const page of doc.pages) {
+        for (const block of page.blocks) {
+          if (block.type === 'story' || block.type === 'lead_story') {
+            allDocStories.push((block as any).story);
+          } else if (block.type === 'story_grid' && Array.isArray((block as any).stories)) {
+            allDocStories.push(...(block as any).stories);
+          }
+        }
+      }
+
+      // Download, validate with Sharp, and embed real news images
+      await imagePipelineService.attachStoryImages(allDocStories);
+
+      // Resolve redirect URLs and validate link statuses
+      for (const st of allDocStories) {
+        if (st.originalUrl && (!st.resolvedUrl || st.linkStatus === 'UNKNOWN')) {
+          try {
+            const res = await urlResolver.resolveAndValidate(st.originalUrl);
+            st.resolvedUrl = res.resolvedUrl;
+            st.linkStatus = res.linkStatus;
+          } catch {
+            st.resolvedUrl = st.originalUrl;
+            st.linkStatus = 'UNKNOWN';
+          }
+        }
+      }
+
+      // Log diagnostics in development or debug mode
+      if (process.env.NODE_ENV !== 'production' || process.env.DEBUG_ARTICLE_PIPELINE === 'true') {
+        logArticleDiagnostics(allDocStories);
+      }
+
       // 6. Multi-format Rendering
       let imageBuffer: Buffer | undefined;
       let imageMimeType: string | undefined;
@@ -282,13 +319,14 @@ export class EditionPipelineService {
     const seenUrls = new Set<string>();
 
     const addStory = (story: any) => {
-      if (story && story.originalUrl && !seenUrls.has(story.originalUrl)) {
-        seenUrls.add(story.originalUrl);
+      const targetUrl = story?.resolvedUrl || story?.originalUrl;
+      if (story && targetUrl && !seenUrls.has(targetUrl)) {
+        seenUrls.add(targetUrl);
         sources.push({
           section: story.section || 'news',
           headline: story.headline,
           sourceName: story.source || 'Verified Source',
-          articleUrl: story.originalUrl,
+          articleUrl: targetUrl,
         });
       }
     };

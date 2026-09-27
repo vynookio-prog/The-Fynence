@@ -145,7 +145,8 @@ export function generatePageSvg(
       case 'lead_story': {
         const s = block.story;
         const headlineLines = wrapLines(s.headline, 42, 3);
-        const summaryLines = wrapLines(s.summary, 65, 7);
+        const leadStoryContent = s.whatHappened ? `${s.whatHappened} ${s.details || ''}` : s.summary;
+        const summaryLines = wrapLines(leadStoryContent, 65, 7);
 
         bodySvg += `
           <!-- Lead Story Kicker -->
@@ -160,20 +161,32 @@ export function generatePageSvg(
         });
         bodySvg += `</g>`;
 
-        currentY += headlineLines.length * 34 + 14;
+        currentY += headlineLines.length * 34 + 10;
 
-        if (s.image) {
+        if (s.subheadline) {
+          const subLines = wrapLines(s.subheadline, 65, 2);
+          bodySvg += `<g font-family="Georgia, serif" font-size="14" font-style="italic" fill="${palette.mutedInk}">`;
+          subLines.forEach((line, idx) => {
+            bodySvg += `<text x="44" y="${currentY + idx * 19}">${escapeXml(line)}</text>`;
+          });
+          bodySvg += `</g>`;
+          currentY += subLines.length * 19 + 10;
+        }
+
+        const hasValidImage = Boolean(s.image && (s.image.assetDataUri || s.image.url));
+
+        if (hasValidImage) {
           const colWidth = (width - 116) / 2;
           const imgHeight = 240;
+          const imgSource = s.image!.assetDataUri || s.image!.url;
 
           bodySvg += `
-            <rect x="44" y="${currentY}" width="${colWidth}" height="${imgHeight}" fill="#1A1816" stroke="${palette.rule}" stroke-width="1"/>
-            <rect x="48" y="${currentY + 4}" width="${colWidth - 8}" height="${imgHeight - 28}" fill="#2D2924"/>
-            <text x="${44 + colWidth / 2}" y="${currentY + imgHeight / 2 - 8}" font-family="Georgia, serif" font-size="13" font-style="italic" fill="#E8DCBE" text-anchor="middle">${escapeXml(s.image.caption || 'Verified Press Dispatch Wire')}</text>
-            <text x="${44 + colWidth / 2}" y="${currentY + imgHeight / 2 + 12}" font-family="Arial, sans-serif" font-size="9" fill="#B0A48E" text-anchor="middle">OFFICIAL PUBLISHER ARCHIVE</text>
+            <!-- Lead Story Real Photo (Verified Press Dispatch Wire) -->
+            <rect x="44" y="${currentY}" width="${colWidth}" height="${imgHeight - 24}" fill="${palette.lightPaper}" stroke="${palette.rule}" stroke-width="1"/>
+            <image href="${escapeXml(imgSource)}" x="45" y="${currentY + 1}" width="${colWidth - 2}" height="${imgHeight - 26}" preserveAspectRatio="xMidYMid slice"/>
             
-            <rect x="44" y="${currentY + imgHeight - 20}" width="${colWidth}" height="20" fill="${palette.lightPaper}"/>
-            <text x="52" y="${currentY + imgHeight - 6}" font-family="Arial, sans-serif" font-size="9" fill="${palette.faintInk}">PHOTO: ${escapeXml(s.image.credit || s.source)}</text>
+            <rect x="44" y="${currentY + imgHeight - 24}" width="${colWidth}" height="24" fill="${palette.lightPaper}" stroke="${palette.rule}" stroke-width="1"/>
+            <text x="50" y="${currentY + imgHeight - 8}" font-family="Arial, sans-serif" font-size="8.5" fill="${palette.faintInk}">PHOTO: ${escapeXml(s.image!.credit || s.source)}${s.image!.caption ? ` — ${escapeXml(s.image!.caption.substring(0, 45))}` : ''}</text>
 
             <g font-family="'Merriweather', Georgia, serif" font-size="13" fill="${palette.mutedInk}">
           `;
@@ -204,7 +217,7 @@ export function generatePageSvg(
           currentY += 16;
         } else {
           const fullWidth = width - 88;
-          const textSummaryLines = wrapLines(s.summary, 90, 6);
+          const textSummaryLines = wrapLines(leadStoryContent, 90, 6);
           bodySvg += `<g font-family="'Merriweather', Georgia, serif" font-size="13.5" fill="${palette.mutedInk}">`;
           textSummaryLines.forEach((line, idx) => {
             bodySvg += `<text x="44" y="${currentY + 16 + idx * 22}">${escapeXml(line)}</text>`;
@@ -237,7 +250,8 @@ export function generatePageSvg(
       case 'story': {
         const s = block.story;
         const headlineLines = wrapLines(s.headline, 48, 2);
-        const summaryLines = wrapLines(s.summary, 75, 4);
+        const storyContent = s.whatHappened ? `${s.whatHappened} ${s.details || ''}` : s.summary;
+        const summaryLines = wrapLines(storyContent, 75, 4);
 
         bodySvg += `
           ${s.kicker ? `<text x="44" y="${currentY + 10}" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="${palette.accentCrimson}">${escapeXml(s.kicker)}</text>` : ''}
@@ -246,15 +260,26 @@ export function generatePageSvg(
         headlineLines.forEach((hl, hIdx) => {
           bodySvg += `<text x="44" y="${currentY + 26 + hIdx * 22}">${escapeXml(hl)}</text>`;
         });
-        bodySvg += `</g><g font-family="'Merriweather', Georgia, serif" font-size="12" fill="${palette.mutedInk}">`;
+        bodySvg += `</g>`;
+
+        let subOffset = 0;
+        if (s.subheadline) {
+          const subLines = wrapLines(s.subheadline, 75, 1);
+          if (subLines.length > 0) {
+            bodySvg += `<text x="44" y="${currentY + 28 + headlineLines.length * 22}" font-family="Georgia, serif" font-size="12" font-style="italic" fill="${palette.mutedInk}">${escapeXml(subLines[0])}</text>`;
+            subOffset = 18;
+          }
+        }
+
+        bodySvg += `<g font-family="'Merriweather', Georgia, serif" font-size="12" fill="${palette.mutedInk}">`;
         summaryLines.forEach((sl, slIdx) => {
-          bodySvg += `<text x="44" y="${currentY + 30 + headlineLines.length * 22 + slIdx * 18}">${escapeXml(sl)}</text>`;
+          bodySvg += `<text x="44" y="${currentY + 30 + headlineLines.length * 22 + subOffset + slIdx * 18}">${escapeXml(sl)}</text>`;
         });
         bodySvg += `</g>
-          <text x="44" y="${currentY + 38 + headlineLines.length * 22 + summaryLines.length * 18}" font-family="Arial, sans-serif" font-size="9" fill="${palette.faintInk}">SOURCE: ${escapeXml(s.source)}</text>
+          <text x="44" y="${currentY + 38 + headlineLines.length * 22 + subOffset + summaryLines.length * 18}" font-family="Arial, sans-serif" font-size="9" fill="${palette.faintInk}">SOURCE: ${escapeXml(s.source)}</text>
         `;
 
-        currentY += headlineLines.length * 22 + summaryLines.length * 18 + 50;
+        currentY += headlineLines.length * 22 + subOffset + summaryLines.length * 18 + 50;
         bodySvg += `<line x1="44" y1="${currentY}" x2="${width - 44}" y2="${currentY}" stroke="${palette.rule}" stroke-width="1"/>`;
         currentY += 14;
         break;
@@ -274,7 +299,8 @@ export function generatePageSvg(
           rowStories.forEach((st, sIdx) => {
             const colX = 44 + sIdx * (colWidth + gap);
             const headlineLines = wrapLines(st.headline, Math.floor(colWidth / 15), 2);
-            const summaryLines = wrapLines(st.summary, Math.floor(colWidth / 10), 4);
+            const storyContent = st.whatHappened ? `${st.whatHappened} ${st.details || ''}` : st.summary;
+            const summaryLines = wrapLines(storyContent, Math.floor(colWidth / 10), 4);
             const cardHeight = headlineLines.length * 22 + summaryLines.length * 18 + 56;
             if (cardHeight > maxRowHeight) maxRowHeight = cardHeight;
 

@@ -151,7 +151,7 @@ export class EditorialEngine {
       entities: validated.entities,
       metrics,
       contentHash,
-      model: provider.name === 'gemini' ? (aiRes.model || 'gemini-2.5-flash') : provider.defaultModel,
+      model: provider.name === 'gemini' ? (aiRes.model || 'gemini-3.8-flash') : provider.defaultModel,
       promptVersion: EDITORIAL_PROMPT_VERSION,
       generatedAt: nowIso,
       createdAt: nowIso,

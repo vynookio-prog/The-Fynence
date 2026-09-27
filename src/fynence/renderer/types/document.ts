@@ -19,6 +19,11 @@ export type NewspaperSectionName =
 
 export interface NewspaperStoryImage {
   url: string;
+  assetDataUri?: string;
+  assetBuffer?: Buffer;
+  width?: number;
+  height?: number;
+  mimeType?: string;
   credit: string;
   source: string;
   caption?: string;
@@ -28,13 +33,19 @@ export interface NewspaperStoryImage {
 
 export interface NewspaperStory {
   id: string;
+  title?: string;
   headline: string;
+  subheadline?: string;
+  whatHappened?: string;
+  details?: string;
   kicker?: string;
   summary: string;
   whyItMatters?: string;
   keyPoints?: string[];
   source: string;
   originalUrl: string;
+  resolvedUrl?: string;
+  linkStatus?: 'VALID' | 'REDIRECTED' | 'PAYWALLED' | 'BLOCKED' | 'BROKEN' | 'UNKNOWN';
   author?: string;
   publishedAt?: string;
   image?: NewspaperStoryImage;
