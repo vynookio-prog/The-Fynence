@@ -12,10 +12,10 @@ export class NewsValidator {
     const errors: string[] = [];
 
     // 1. Title validation
-    if (!article.title || typeof article.title !== 'string') {
-      errors.push('Missing article title');
+    if (!article.title || typeof article.title !== 'string' || article.title.trim().length === 0) {
+      errors.push('Missing or empty article title');
     } else if (article.title.trim().length < 5) {
-      errors.push(`Title is too short (${article.title.trim().length} chars)`);
+      errors.push(`Article title is too short (${article.title.trim().length} chars, min 5)`);
     }
 
     // 2. Source validation
@@ -37,7 +37,7 @@ export class NewsValidator {
       }
     }
 
-    // 4. Publication Date validation
+    // 4. Publication Date validation (optional, must be valid timestamp if present)
     if (article.publishedAt) {
       const pubTime = new Date(article.publishedAt).getTime();
       if (isNaN(pubTime)) {
@@ -51,11 +51,12 @@ export class NewsValidator {
       }
     }
 
-    // 5. Substance validation: either description or content should exist
-    const hasDescription = Boolean(article.description && article.description.trim().length > 0);
-    const hasContent = Boolean(article.content && article.content.trim().length > 0);
-    if (!hasDescription && !hasContent && (article.title ? article.title.length < 20 : true)) {
-      errors.push('Article lacks substantive text (empty description and content)');
+    // 5. Substance validation: Must have at least a meaningful title or description
+    const titleLen = (article.title || '').trim().length;
+    const descLen = (article.description || '').trim().length;
+    const contentLen = (article.content || '').trim().length;
+    if (descLen === 0 && contentLen === 0 && titleLen < 20) {
+      errors.push('Article lacks substantive text (no description/content and short headline)');
     }
 
     return {

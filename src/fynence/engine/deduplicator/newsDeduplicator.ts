@@ -58,6 +58,8 @@ export class NewsDeduplicator {
       if (existingId) {
         return {
           isDuplicate: true,
+          isExactDuplicate: true,
+          isSimilarStory: false,
           existingArticleId: existingId,
           matchedUrl: canonical,
           reason: 'canonical_url_match',
@@ -73,6 +75,8 @@ export class NewsDeduplicator {
       if (existingId) {
         return {
           isDuplicate: true,
+          isExactDuplicate: true,
+          isSimilarStory: false,
           existingArticleId: existingId,
           matchedTitle: candidate.title,
           reason: 'normalized_title_match',
@@ -93,7 +97,7 @@ export class NewsDeduplicator {
         if (timeDiff > maxTimeDiffMs) continue;
 
         const similarity = calculateJaccardSimilarity(candidateTokens, entry.tokens);
-        if (similarity >= (this.options.similarityThreshold || 0.70)) {
+        if (similarity >= 0.45) {
           if (!bestMatch || similarity > bestMatch.score) {
             bestMatch = { id: entry.id, title: entry.title, score: similarity };
           }
@@ -101,8 +105,11 @@ export class NewsDeduplicator {
       }
 
       if (bestMatch) {
+        const isDuplicate = bestMatch.score >= (this.options.similarityThreshold || 0.70);
         return {
-          isDuplicate: true,
+          isDuplicate,
+          isExactDuplicate: false,
+          isSimilarStory: true,
           existingArticleId: bestMatch.id,
           matchedTitle: bestMatch.title,
           reason: 'title_token_similarity',
@@ -113,6 +120,8 @@ export class NewsDeduplicator {
 
     return {
       isDuplicate: false,
+      isExactDuplicate: false,
+      isSimilarStory: false,
       similarityScore: 0.0,
     };
   }

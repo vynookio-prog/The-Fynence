@@ -8,6 +8,8 @@ export type DuplicateMatchReason =
 
 export interface DeduplicationResult {
   isDuplicate: boolean;
+  isExactDuplicate?: boolean;
+  isSimilarStory?: boolean;
   existingArticleId?: string;
   matchedUrl?: string;
   matchedTitle?: string;

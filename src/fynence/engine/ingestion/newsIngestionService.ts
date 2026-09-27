@@ -1,4 +1,5 @@
 import type { Article } from '../../types/article';
+import type { NewspaperStory } from '../../renderer/types/document';
 import type { IngestionRunSummary, IngestionSourceSummary } from './types';
 import { sourceRegistry } from '../registry/sourceRegistry';
 import { newsFetcher } from '../fetcher/newsFetcher';
@@ -11,6 +12,10 @@ import { newsDeduplicator } from '../deduplicator/newsDeduplicator';
 import { newsClassifier } from '../classifier/newsClassifier';
 import { newsRepository } from '../repository/newsRepository';
 import { storyClusterManager } from '../clustering/storyCluster';
+import { getNewsEngineConfig } from '../config/newsEngineConfig';
+import { newsRanker } from '../ranking/newsRanker';
+import { editorialCandidateSelector } from '../../editorial/engine/editorialCandidateSelector';
+import type { RssDiagnosticsReport } from '../observability/rssReport';
 
 export class NewsIngestionService {
   /**
@@ -80,7 +85,9 @@ export class NewsIngestionService {
         ? parseNewsApiResponse(response.body)
         : parseRssOrAtom(response.body);
 
-      const items = feed.items.slice(0, source.maxItemsPerFetch || 30);
+      const config = getNewsEngineConfig();
+      const maxItems = source.maxItemsPerFetch || config.itemsPerFeed;
+      const items = feed.items.slice(0, maxItems);
       const fetchedCount = items.length;
 
       let validCount = 0;
@@ -124,9 +131,9 @@ export class NewsIngestionService {
             normalized.imageUsageStatus = 'unavailable';
           }
 
-          // Deduplicate
+          // Deduplicate: drop only exact duplicates (exact URL or normalized title match)
           const dupResult = newsDeduplicator.checkDuplicate(normalized, normalized.publishedAt);
-          if (dupResult.isDuplicate) {
+          if (dupResult.isExactDuplicate) {
             duplicatesCount++;
             continue;
           }
@@ -134,8 +141,8 @@ export class NewsIngestionService {
           // Classify
           const classification = newsClassifier.classify(
             normalized,
-            source.categories[0] || 'markets',
-            source.regions[0] || 'global'
+            source.category || source.categories[0] || 'markets',
+            source.region || source.regions[0] || 'global'
           );
 
           normalized.category = classification.primaryCategory;
@@ -227,6 +234,7 @@ export class NewsIngestionService {
 
     const enabledSources = sourceRegistry.getEnabled();
     const sourceSummaries: IngestionSourceSummary[] = [];
+    const config = getNewsEngineConfig();
 
     let totalFetched = 0;
     let totalValid = 0;
@@ -234,17 +242,32 @@ export class NewsIngestionService {
     let totalStored = 0;
     let totalFailed = 0;
 
-    for (const source of enabledSources) {
-      // Graceful error boundary per source
-      const summary = await this.ingestSource(source.id);
-      sourceSummaries.push(summary);
+    // Parallel ingestion worker pool with failure isolation
+    const queue = [...enabledSources];
+    const concurrency = Math.min(config.maxConcurrentFetches || 6, enabledSources.length || 1);
 
-      totalFetched += summary.fetched;
-      totalValid += summary.valid;
-      totalDuplicates += summary.duplicates;
-      totalStored += summary.stored;
-      totalFailed += summary.failed;
-    }
+    const worker = async () => {
+      while (queue.length > 0) {
+        // Enforce global raw articles ceiling
+        if (totalStored >= config.maxRawArticles) {
+          break;
+        }
+        const source = queue.shift();
+        if (!source) break;
+
+        const summary = await this.ingestSource(source.id);
+        sourceSummaries.push(summary);
+
+        totalFetched += summary.fetched;
+        totalValid += summary.valid;
+        totalDuplicates += summary.duplicates;
+        totalStored += summary.stored;
+        totalFailed += summary.failed;
+      }
+    };
+
+    const workers = Array.from({ length: concurrency }, () => worker());
+    await Promise.all(workers);
 
     return {
       runId,
@@ -258,6 +281,107 @@ export class NewsIngestionService {
       totalStored,
       totalFailed,
       sourceSummaries,
+    };
+  }
+
+  /**
+   * Complete end-to-end RSS ingestion, candidate pool ranking, and broadsheet story synthesis.
+   * Architecture: RSS -> Normalize -> Validate -> Deduplicate -> Categorize -> Rank -> Pool -> Editorial -> Stories
+   */
+  public async ingestAndBuildEditorialStories(options: {
+    editionType?: string;
+    sections?: string[];
+    targetCount?: number;
+    forceRefresh?: boolean;
+    useAi?: boolean;
+  } = {}): Promise<{
+    stories: NewspaperStory[];
+    candidates: Article[];
+    report: RssDiagnosticsReport;
+  }> {
+    const startTime = Date.now();
+    const config = getNewsEngineConfig();
+    const editionType = options.editionType || 'daily';
+
+    // 1. Ingest across enabled feeds
+    const runSummary = await this.ingestAll();
+
+    // 2. Query recent verified articles
+    const dbArticles = await newsRepository.getRecentArticles(
+      config.maxRawArticles,
+      config.freshnessHours
+    );
+
+    const articles: Article[] = dbArticles.map(a => ({
+      id: a.id,
+      title: a.title,
+      description: a.description,
+      content: a.content || undefined,
+      url: a.url,
+      source: a.source,
+      sourceId: a.source_id || undefined,
+      author: a.author,
+      category: a.category,
+      region: a.region,
+      publishedAt: a.published_at,
+      imageUrl: a.image_url,
+      imageSource: a.image_source,
+      imageCredit: a.image_credit,
+      imageUsageStatus: a.image_usage_status,
+      createdAt: a.created_at,
+      updatedAt: a.updated_at,
+    }));
+
+    // 3. Build ranked editorial candidate pool (with freshness, category, topic clustering, diversity capping)
+    const poolResult = newsRanker.buildCandidatePool(articles, {
+      editionType,
+      sections: options.sections,
+      freshnessHours: config.freshnessHours,
+      maxArticlesPerSource: config.maxArticlesPerSource,
+    });
+
+    // 4. Synthesize final newspaper stories
+    const targetStoryCount = editorialCandidateSelector.resolveTargetCount(
+      editionType,
+      options.targetCount
+    );
+
+    const stories = await editorialCandidateSelector.selectStories(poolResult.candidates, {
+      editionType,
+      targetCount: targetStoryCount,
+      useAi: options.useAi,
+    });
+
+    const failedFeedsList = runSummary.sourceSummaries
+      .filter(s => s.status === 'failed')
+      .map(s => ({ id: s.sourceId, error: s.errorMessage || 'Fetch failed' }));
+
+    const successfulFeedsCount = runSummary.sourceSummaries.filter(
+      s => s.status === 'completed' || s.status === 'not_modified'
+    ).length;
+
+    const report: RssDiagnosticsReport = {
+      feedsConfigured: runSummary.sourcesProcessed,
+      feedsSuccessful: successfulFeedsCount,
+      feedsFailed: failedFeedsList.length,
+      failedFeedsList,
+      rawArticlesFetched: runSummary.totalFetched,
+      invalidArticles: runSummary.totalFailed,
+      exactDuplicatesRemoved: runSummary.totalDuplicates,
+      uniqueArticles: runSummary.totalStored,
+      similarityGroups: poolResult.storyClustersFormed,
+      articlesAfterFiltering: poolResult.candidates.length,
+      articlesPerCategory: poolResult.categoryBreakdown,
+      articlesPerSource: poolResult.sourceBreakdown,
+      editorialCandidatePoolSize: poolResult.candidates.length,
+      finalSelectedStoriesCount: stories.length,
+      durationMs: Date.now() - startTime,
+    };
+
+    return {
+      stories,
+      candidates: poolResult.candidates.map(c => c.article),
+      report,
     };
   }
 }

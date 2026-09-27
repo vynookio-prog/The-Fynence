@@ -7,8 +7,13 @@ export interface NewsSourceConfig {
   name: string;
   type: NewsSourceType;
   url: string;
+  category?: ArticleCategory;
   categories: ArticleCategory[];
+  region?: ArticleRegion;
   regions: ArticleRegion[];
+  language?: string;
+  priority?: number;
+  reliabilityScore?: number;
   enabled: boolean;
   rateLimitMs?: number;
   timeoutMs?: number;

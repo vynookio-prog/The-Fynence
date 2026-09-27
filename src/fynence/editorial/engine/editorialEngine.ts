@@ -227,6 +227,40 @@ export class EditorialEngine {
       durationMs: Date.now() - startTime,
     };
   }
+
+  /**
+   * Processes an incoming raw article batch directly into broadsheet stories via candidate pool ranking.
+   */
+  public async processCandidatePoolToStories(
+    articles: Article[],
+    options?: {
+      editionType?: string;
+      targetCount?: number;
+      provider?: AIProvider;
+      useAi?: boolean;
+      sections?: string[];
+    }
+  ): Promise<{
+    stories: import('../../renderer/types/document').NewspaperStory[];
+    poolResult: import('../../engine/ranking/newsRanker').CandidatePoolResult;
+  }> {
+    const { newsRanker } = await import('../../engine/ranking/newsRanker');
+    const { editorialCandidateSelector } = await import('./editorialCandidateSelector');
+
+    const poolResult = newsRanker.buildCandidatePool(articles, {
+      editionType: options?.editionType,
+      sections: options?.sections,
+    });
+
+    const stories = await editorialCandidateSelector.selectStories(poolResult.candidates, {
+      editionType: options?.editionType,
+      targetCount: options?.targetCount,
+      provider: options?.provider || this.defaultProvider,
+      useAi: options?.useAi,
+    });
+
+    return { stories, poolResult };
+  }
 }
 
 export const editorialEngine = new EditorialEngine();

@@ -24,15 +24,37 @@ export class FetchError extends Error {
   }
 }
 
+export interface CachedFeedResponse {
+  response: FetchResponse;
+  expiresAt: number;
+}
+
+export interface ParallelFetchResult {
+  source: NewsSourceConfig;
+  success: boolean;
+  response?: FetchResponse;
+  error?: string;
+  durationMs: number;
+}
+
 export class NewsFetcher {
   private hostLastRequestTime: Map<string, number> = new Map();
+  private cache: Map<string, CachedFeedResponse> = new Map();
 
   constructor(
-    private readonly defaultTimeoutMs: number = 10000,
-    private readonly userAgent: string = 'TheFynence-EditorialBot/1.0 (+https://thefynence.internal; News Ingestion Engine)'
+    private readonly defaultTimeoutMs: number = 8000,
+    private readonly userAgent: string = 'TheFynence-EditorialBot/1.0 (+https://thefynence.internal; News Ingestion Engine)',
+    private readonly cacheTtlMs: number = 15 * 60 * 1000 // 15 mins default
   ) {}
 
-  public async fetchSource(source: NewsSourceConfig): Promise<FetchResponse> {
+  public clearCache(): void {
+    this.cache.clear();
+  }
+
+  public async fetchSource(
+    source: NewsSourceConfig,
+    options?: { forceRefresh?: boolean }
+  ): Promise<FetchResponse> {
     const security = validateExternalUrl(source.url);
     if (!security.isSafe || !security.normalizedUrl) {
       throw new FetchError(
@@ -66,6 +88,14 @@ export class NewsFetcher {
       const apiKey = process.env[source.apiKeyEnvVar];
       if (apiKey) {
         headers['X-Api-Key'] = apiKey;
+      }
+    }
+
+    // Check in-memory cache
+    if (!options?.forceRefresh) {
+      const cached = this.cache.get(targetUrl);
+      if (cached && cached.expiresAt > Date.now()) {
+        return { ...cached.response };
       }
     }
 
@@ -112,7 +142,7 @@ export class NewsFetcher {
         }
 
         const body = await response.text();
-        return {
+        const fetchResult: FetchResponse = {
           statusCode: response.status,
           body,
           contentType: response.headers.get('content-type') || '',
@@ -121,6 +151,14 @@ export class NewsFetcher {
           notModified: false,
           durationMs,
         };
+
+        // Cache the successful response
+        this.cache.set(targetUrl, {
+          response: fetchResult,
+          expiresAt: Date.now() + this.cacheTtlMs,
+        });
+
+        return fetchResult;
       } catch (err: any) {
         lastError = err;
         const isAbort = err?.name === 'AbortError';
@@ -148,6 +186,46 @@ export class NewsFetcher {
     }
 
     throw lastError || new FetchError('Failed after retry', undefined, source.id, targetUrl);
+  }
+
+  public async fetchSourcesInParallel(
+    sources: NewsSourceConfig[],
+    options?: { concurrency?: number; forceRefresh?: boolean }
+  ): Promise<ParallelFetchResult[]> {
+    const concurrency = options?.concurrency || 6;
+    const results: ParallelFetchResult[] = [];
+    const queue = [...sources];
+
+    const worker = async () => {
+      while (queue.length > 0) {
+        const source = queue.shift();
+        if (!source) break;
+        const start = Date.now();
+        try {
+          const res = await this.fetchSource(source, options);
+          results.push({
+            source,
+            success: true,
+            response: res,
+            durationMs: Date.now() - start,
+          });
+        } catch (err: any) {
+          results.push({
+            source,
+            success: false,
+            error: err?.message || 'Unknown fetch error',
+            durationMs: Date.now() - start,
+          });
+        }
+      }
+    };
+
+    const workers = Array.from(
+      { length: Math.min(concurrency, sources.length || 1) },
+      () => worker()
+    );
+    await Promise.all(workers);
+    return results;
   }
 
   private async enforceRateLimit(hostname: string, minIntervalMs: number): Promise<void> {

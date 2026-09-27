@@ -101,6 +101,130 @@ export const MOCK_STORIES: NewspaperStory[] = [
     importance: 'low',
     columnSpan: 1,
   },
+  {
+    id: 'story-markets-06',
+    headline: 'Global Sovereign Wealth Funds Accelerate Allocations into Core Infrastructure',
+    kicker: 'CAPITAL MARKETS CHRONICLE',
+    summary:
+      'Institutional fund managers reported substantial capital rotations toward regulated transmission grids and renewable logistics hubs, seeking predictable inflation-indexed cash yields amidst shifting central bank benchmark rates.',
+    whyItMatters:
+      'Long-term sovereign capital deployment stabilizes primary issuance markets and anchors long-term yield curves across global bond hubs.',
+    source: 'Financial Times Wire',
+    originalUrl: 'https://ft.com/markets/infrastructure-allocations',
+    author: 'Julian Thorne, London',
+    publishedAt: '2026-09-27T02:00:00Z',
+    section: 'markets',
+    importance: 'high',
+    columnSpan: 2,
+    image: {
+      url: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=80',
+      credit: 'Financial Times Syndicate',
+      source: 'Financial Times Wire',
+      caption: 'Trading floor activity during the morning opening bell.',
+      aspectRatio: '16:9',
+      isAiGenerated: false,
+    },
+  },
+  {
+    id: 'story-forex-07',
+    headline: 'Major Currency Cross Pairs Settle in Compressed Trading Ranges',
+    kicker: 'GLOBAL FOREIGN EXCHANGE',
+    summary:
+      'Implied foreign exchange volatility across the G10 currency basket declined to multi-month lows as commercial hedgers and institutional desks balanced currency forward exposures ahead of sovereign inflation readings.',
+    whyItMatters:
+      'Dampened currency fluctuations lower multinational transactional friction and decrease foreign currency hedging expenditure for international trade.',
+    source: 'ForexLive Wires',
+    originalUrl: 'https://forexlive.com/news/g10-fx-volatility-settles',
+    author: 'Clara Oswald, Geneva',
+    publishedAt: '2026-09-27T01:30:00Z',
+    section: 'forex',
+    importance: 'medium',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-crypto-08',
+    headline: 'Institutional Digital Asset Custody Protocols Obtain Regulatory Approvals',
+    kicker: 'DIGITAL ASSETS & PROTOCOLS',
+    summary:
+      'Tier-one custodial platforms secured enhanced institutional licenses across international financial hubs, enabling regulated trust companies to hold spot digital collateral with bankruptcy-remote insurance protection.',
+    whyItMatters:
+      'Standardized institutional segregation mitigates counterparty vulnerabilities and facilitates pension participation in verified spot crypto instruments.',
+    source: 'CoinDesk Syndicate',
+    originalUrl: 'https://coindesk.com/policy/custodial-framework-clearance',
+    author: 'Sarah Chen, Singapore',
+    publishedAt: '2026-09-26T22:15:00Z',
+    section: 'crypto',
+    importance: 'medium',
+    columnSpan: 2,
+    image: {
+      url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80',
+      credit: 'CoinDesk Photo Bureau',
+      source: 'CoinDesk Syndicate',
+      caption: 'Secure hardware infrastructure at a financial data centre.',
+      aspectRatio: '16:9',
+      isAiGenerated: false,
+    },
+  },
+  {
+    id: 'story-biz-09',
+    headline: 'Aerospace Engineering Consortia Finalize Multi-Year Commercial Orders',
+    kicker: 'ENTERPRISE & COMMERCE',
+    summary:
+      'Global aerospace manufacturers announced firm contracts for next-generation turbofan systems and composite airframes, reflecting sustained medium-term international air freight and passenger capacity demand.',
+    whyItMatters:
+      'Long-cycle aerospace production backlogs provide multi-year revenue visibility for Tier-2 advanced materials and titanium sub-contractors.',
+    source: 'Reuters Financial Wires',
+    originalUrl: 'https://reuters.com/business/aerospace-contracts-expansion',
+    publishedAt: '2026-09-26T20:00:00Z',
+    section: 'business',
+    importance: 'medium',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-markets-10',
+    headline: 'Crude Benchmarks Rebound Supported by Maritime Transport Clearances',
+    kicker: 'COMMODITIES & ENERGY',
+    summary:
+      'Brent and WTI petroleum futures recorded moderate advances following inventory drawdowns at primary deepwater refining hubs and balanced refinery utilization schedules across Atlantic shipping lanes.',
+    whyItMatters:
+      'Energy benchmark equilibrium directly influences maritime freight indices, jet fuel cracking spreads, and consumer logistical cost indices.',
+    source: 'MarketWatch Top Stories',
+    originalUrl: 'https://marketwatch.com/story/crude-draws-anchor-energy-complex',
+    publishedAt: '2026-09-27T00:15:00Z',
+    section: 'markets',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-finance-11',
+    headline: 'Commercial Lending Syndicates Expand Credit Windows for Industrial Modernization',
+    kicker: 'CORPORATE BANKING',
+    summary:
+      'Consortiums of private and sovereign financial institutions finalized revolving credit extensions for automated manufacturing hubs, citing strong debt-service coverage ratios and collateral liquidity.',
+    whyItMatters:
+      'Prudent corporate lending transmission sustains capital expenditure growth without stressing bank Tier-1 common equity buffers.',
+    source: 'The Financial Times',
+    originalUrl: 'https://ft.com/banking/syndicated-lending-industrial',
+    publishedAt: '2026-09-26T19:30:00Z',
+    section: 'finance',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-national-12',
+    headline: 'Sovereign Infrastructure Bonds Meet Strong Domestic Retail Uptake',
+    kicker: 'NUSANTARA CAPITAL DESK',
+    summary:
+      'The ministry of finance reported complete subscription across green retail bond tranches, with domestic pension funds and individual savers actively allocating funds into sustainable provincial infrastructure projects.',
+    whyItMatters:
+      'Domestic retail bond absorption reduces dependence on offshore capital while deepening national financial market literacy and liquidity.',
+    source: 'Antara News Ekonomi',
+    originalUrl: 'https://antaranews.com/berita/sukuk-ritel-infrastruktur',
+    publishedAt: '2026-09-27T02:45:00Z',
+    section: 'national',
+    importance: 'medium',
+    columnSpan: 2,
+  },
 ];
 
 export const MOCK_TICKERS: MarketTickerItem[] = [
