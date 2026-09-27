@@ -15,3 +15,4 @@ export * from './image';
 export * from './composer';
 export * from './renderer';
 export * from './pdf';
+export * from './telegram';

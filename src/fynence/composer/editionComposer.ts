@@ -124,7 +124,7 @@ export class EditionComposer {
     // Check for combined Finance + Economy request (Section 10)
     const hasFinance = requestedSections.includes('finance');
     const hasEconomy = requestedSections.includes('economy');
-    if ((hasFinance && hasEconomy) || editionType === 'finance_economy') {
+    if ((hasFinance && hasEconomy && request.editionType !== 'daily') || editionType === 'finance_economy') {
       editionType = 'finance_economy';
       if (!requestedSections.includes('markets')) requestedSections.push('markets');
       if (!requestedSections.includes('economic_calendar')) requestedSections.push('economic_calendar');
@@ -218,17 +218,20 @@ export class EditionComposer {
   }
 
   private resolveMarketTickers(request: EditionRequest, isMock: boolean): MarketTickerItem[] {
-    if (request.marketSnapshot && request.marketSnapshot.quotesData) {
-      const quotes = Object.values(request.marketSnapshot.quotesData);
-      return quotes.map((q: any) => ({
-        symbol: q.symbol,
-        name: q.displayName || q.symbol,
-        price: Number(q.price),
-        change: Number(q.change || 0),
-        changePercent: Number(q.changePercent || 0),
-        direction: (q.direction?.toLowerCase() === 'up' ? 'up' : q.direction?.toLowerCase() === 'down' ? 'down' : 'flat'),
-        category: q.category,
-      }));
+    const rawQuotes = request.marketSnapshot?.quotesData || request.marketSnapshot?.quotes;
+    if (rawQuotes) {
+      const quotes = Object.values(rawQuotes);
+      if (quotes.length > 0) {
+        return quotes.map((q: any) => ({
+          symbol: q.symbol,
+          name: q.displayName || q.symbol,
+          price: Number(q.price),
+          change: Number(q.change || 0),
+          changePercent: Number(q.changePercent || 0),
+          direction: (q.direction?.toLowerCase() === 'up' ? 'up' : q.direction?.toLowerCase() === 'down' ? 'down' : 'flat'),
+          category: q.category,
+        }));
+      }
     }
 
     if (isMock) {

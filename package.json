@@ -8,11 +8,18 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint",
+    "telegram:bot": "tsx scripts/telegram-bot-polling.ts",
+    "telegram:webhook:set": "tsx scripts/telegram-webhook.ts set",
+    "telegram:webhook:info": "tsx scripts/telegram-webhook.ts info",
+    "telegram:webhook:delete": "tsx scripts/telegram-webhook.ts delete",
+    "test:pipeline": "tsx scripts/verify-pipeline.ts",
+    "test:telegram": "tsx --test tests/fynence/telegram/*.test.ts",
     "postinstall": "node -e \"const fs=require('fs'),p='./node_modules/@insforge/shared-schemas/package.json';if(fs.existsSync(p)){const pkg=JSON.parse(fs.readFileSync(p,'utf8'));pkg.exports['.']['default']='./dist/index.js';pkg.exports['.']['require']='./dist/index.js';fs.writeFileSync(p,JSON.stringify(pkg,null,2));}\""
   },
   "dependencies": {
     "@insforge/sdk": "^1.5.2",
     "clsx": "^2.1.1",
+    "grammy": "^1.46.0",
     "lucide-react": "^1.42.0",
     "next": "16.3.4",
     "pdf-lib": "^1.17.1",
@@ -34,6 +41,7 @@
     "eslint-config-next": "16.3.4",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vite": "^8.3.1"
   }
