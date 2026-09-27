@@ -7,9 +7,27 @@ import { defaultPdfArtifactManager } from '../../pdf/utils/tempArtifactManager';
 import { WeatherService } from '../../weather/service/weatherService';
 import { MarketService } from '../../market/service/marketService';
 import { MockMarketDataProvider } from '../../market/providers/mockMarketProvider';
+import { NewsIngestionService, newsIngestionService } from '../../engine/ingestion/newsIngestionService';
 import { formatNewspaperDateLong } from '../../weather/utils/timezone';
 
 export type ProgressCallback = (statusText: string) => Promise<void>;
+
+export function resolveTargetStoryCount(editionType?: string, sections?: string[]): number {
+  switch (editionType) {
+    case 'daily':
+      return 15;
+    case 'finance':
+    case 'finance_economy':
+      return 15;
+    case 'market':
+      return 12;
+    default:
+      if (sections && sections.length > 0) {
+        return Math.min(15, Math.max(10, sections.length * 3));
+      }
+      return 15;
+  }
+}
 
 export class EditionPipelineService {
   private composer: EditionComposer;
@@ -17,6 +35,7 @@ export class EditionPipelineService {
   private pdfRenderer: PdfRenderer;
   private weatherService: WeatherService;
   private marketService: MarketService;
+  private newsIngestionService?: NewsIngestionService;
 
   constructor(options?: {
     composer?: EditionComposer;
@@ -24,12 +43,14 @@ export class EditionPipelineService {
     pdfRenderer?: PdfRenderer;
     weatherService?: WeatherService;
     marketService?: MarketService;
+    newsIngestionService?: NewsIngestionService;
   }) {
     this.composer = options?.composer || new EditionComposer();
     this.imageRenderer = options?.imageRenderer || new NewspaperRenderer();
     this.pdfRenderer = options?.pdfRenderer || new PdfRenderer();
     this.weatherService = options?.weatherService || new WeatherService();
     this.marketService = options?.marketService || new MarketService();
+    this.newsIngestionService = options?.newsIngestionService;
   }
 
   /**
@@ -107,7 +128,33 @@ export class EditionPipelineService {
         }
       }
 
-      // 4. Progress Update: Rendering Stage
+      // 4. News and Editorial Gathering (Real RSS feeds or fallback)
+      const targetStoryCount = request.targetStoryCount || resolveTargetStoryCount(request.editionType, request.sections);
+      let stories: NewspaperStory[] | undefined = request.articles;
+      let mockMode = request.mockMode;
+
+      if (!stories && !mockMode && this.newsIngestionService) {
+        try {
+          const newsResult = await this.newsIngestionService.ingestAndBuildEditorialStories({
+            editionType: request.editionType,
+            sections: request.sections,
+            targetCount: targetStoryCount,
+            useAi: true,
+          });
+          if (newsResult.stories && newsResult.stories.length > 0) {
+            stories = newsResult.stories;
+            mockMode = false;
+          }
+        } catch {
+          mockMode = true;
+        }
+      }
+
+      if (mockMode === undefined) {
+        mockMode = !stories || stories.length === 0;
+      }
+
+      // Progress Update: Rendering Stage
       if (onProgress) {
         await onProgress(
           '🗞️ Preparing your edition...\n' +
@@ -126,13 +173,16 @@ export class EditionPipelineService {
         weatherSnapshot: weatherData,
         marketSnapshot,
         economicEvents,
-        mockMode: true,
+        articles: stories,
+        targetStoryCount,
+        mockMode,
         theme: request.theme || 'retro_black_cream',
       });
 
       // 6. Multi-format Rendering
       let imageBuffer: Buffer | undefined;
       let imageMimeType: string | undefined;
+      let imagePages: Array<{ buffer: Buffer; mimeType: string; pageNumber: number }> | undefined;
       let pdfBuffer: Buffer | undefined;
       let pdfFileName: string | undefined;
 
@@ -148,6 +198,11 @@ export class EditionPipelineService {
         if (renderedEdition.pages.length > 0) {
           imageBuffer = renderedEdition.pages[0].buffer;
           imageMimeType = renderedEdition.pages[0].mimeType;
+          imagePages = renderedEdition.pages.map((p, idx) => ({
+            buffer: p.buffer,
+            mimeType: p.mimeType,
+            pageNumber: p.pageNumber || idx + 1,
+          }));
         }
       }
 
@@ -186,6 +241,7 @@ export class EditionPipelineService {
         format: request.format,
         imageBuffer,
         imageMimeType,
+        imagePages,
         pdfBuffer,
         pdfFileName,
         sources,
@@ -253,4 +309,4 @@ export class EditionPipelineService {
   }
 }
 
-export const defaultEditionPipelineService = new EditionPipelineService();
+export const defaultEditionPipelineService = new EditionPipelineService({ newsIngestionService });

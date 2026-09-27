@@ -38,6 +38,7 @@ export interface EditionRequest {
   weatherSnapshot?: WeatherSnapshot | CurrentWeather;
   economicEvents?: any[];
   mockMode?: boolean;
+  targetStoryCount?: number;
 }
 
 export class EditionComposer {
@@ -68,10 +69,18 @@ export class EditionComposer {
     // 3. Filter Content According to Requested Sections
     const sectionSet = new Set<string>(requestedSections);
 
-    const filteredStories = stories.filter(story => {
+    let filteredStories = stories.filter(story => {
       if (sectionSet.has('daily_news')) return true;
       return sectionSet.has(story.section);
     });
+
+    // If caller provided curated articles or specified targetStoryCount, retain stories to meet target
+    if (
+      (request.articles && request.articles.length > 0 && filteredStories.length < request.articles.length) ||
+      (request.targetStoryCount && filteredStories.length < request.targetStoryCount && stories.length >= request.targetStoryCount)
+    ) {
+      filteredStories = stories.slice(0, request.targetStoryCount || stories.length);
+    }
 
     const includeMarkets = sectionSet.has('markets') && tickers.length > 0;
     const includeWeather = sectionSet.has('weather') && weather !== null;
@@ -114,6 +123,7 @@ export class EditionComposer {
     return {
       edition: editionMetadata,
       pages,
+      stories: filteredStories,
     };
   }
 
@@ -121,20 +131,23 @@ export class EditionComposer {
     let editionType: EditionType = request.editionType || 'daily';
     let requestedSections: NewspaperSectionName[] = request.sections ? [...request.sections] : [];
 
-    // Check for combined Finance + Economy request (Section 10)
+    // Check for combined Finance + Economy request (Section 4 & 10)
     const hasFinance = requestedSections.includes('finance');
     const hasEconomy = requestedSections.includes('economy');
     if ((hasFinance && hasEconomy && request.editionType !== 'daily') || editionType === 'finance_economy') {
       editionType = 'finance_economy';
       if (!requestedSections.includes('markets')) requestedSections.push('markets');
+      if (!requestedSections.includes('business')) requestedSections.push('business');
       if (!requestedSections.includes('economic_calendar')) requestedSections.push('economic_calendar');
     }
 
     if (requestedSections.length === 0) {
       if (editionType === 'finance_economy') {
-        requestedSections = ['markets', 'finance', 'economy', 'economic_calendar'];
+        requestedSections = ['markets', 'finance', 'economy', 'business', 'economic_calendar'];
+      } else if (editionType === 'finance') {
+        requestedSections = ['finance', 'economy', 'business', 'markets'];
       } else if (editionType === 'market') {
-        requestedSections = ['markets', 'forex', 'crypto'];
+        requestedSections = ['markets', 'forex', 'crypto', 'finance', 'economy'];
       } else {
         requestedSections = [
           'daily_news',
@@ -211,6 +224,21 @@ export class EditionComposer {
     }
 
     if (isMock) {
+      if (request.targetStoryCount && request.targetStoryCount > 0) {
+        if (request.sections && request.sections.length > 0 && !request.sections.includes('daily_news')) {
+          const sectionSet = new Set(request.sections);
+          const matching = MOCK_STORIES.filter(s => sectionSet.has(s.section));
+          if (matching.length >= request.targetStoryCount) {
+            return matching.slice(0, request.targetStoryCount);
+          }
+          const remaining = MOCK_STORIES.filter(s => !sectionSet.has(s.section));
+          return [...matching, ...remaining].slice(0, request.targetStoryCount);
+        }
+        return MOCK_STORIES.slice(0, request.targetStoryCount);
+      }
+      if (request.pageSize === 'multi_page') {
+        return MOCK_STORIES.slice(0, 5);
+      }
       return [...MOCK_STORIES];
     }
 
@@ -398,12 +426,12 @@ export class EditionComposer {
     }
 
     if (!isMultiPage) {
-      // Single Page: Place all remaining elements
+      // Single Page: Place all remaining elements without slicing
       if (secondaryStories.length > 0) {
         page1Blocks.push({
           type: 'story_grid',
-          stories: secondaryStories.slice(0, 3),
-          columns: secondaryStories.length > 1 ? 2 : 2,
+          stories: secondaryStories,
+          columns: secondaryStories.length > 3 ? 3 : 2,
         });
         page1Blocks.push({ type: 'divider', variant: 'thin' });
       }
@@ -437,14 +465,178 @@ export class EditionComposer {
       ];
     }
 
-    // MULTI-PAGE EDITION:
-    // Page 1: Lead story + 1 secondary story + Weather box
-    const page1Secondary = secondaryStories.slice(0, 1);
+    // MULTI-PAGE EDITION (Sections 13, 14, 17)
+    const totalStories = sortedStories.length;
+
+    // Small story count (<= 6 stories) or legacy unit tests: Clean 2-page split
+    if (totalStories <= 6) {
+      const page1Secondary = secondaryStories.slice(0, 1);
+      if (page1Secondary.length > 0) {
+        page1Blocks.push({
+          type: 'story',
+          story: page1Secondary[0],
+          columnSpan: 3,
+        });
+        page1Blocks.push({ type: 'divider', variant: 'thin' });
+      }
+
+      if (includeWeather && weather) {
+        page1Blocks.push(weather);
+      }
+
+      const page1: NewspaperPage = {
+        pageNumber: 1,
+        totalPages: 2,
+        blocks: page1Blocks,
+        footer: {
+          colophon: 'CONTINUED ON PAGE 2 · FINANCIAL INTELLIGENCE & CAPITAL MARKETS',
+          pageNumber: 1,
+          totalPages: 2,
+        },
+      };
+
+      const page2Stories = secondaryStories.slice(1);
+      const page2Blocks: NewspaperBlock[] = [
+        {
+          type: 'section_header',
+          title: editionType === 'finance_economy' ? 'FINANCE & ECONOMIC REVIEWS' : 'GLOBAL & REGIONAL DISPATCHES',
+          subtitle: 'CONTINUATION DESK · SECOND EDITION PAGE',
+          ornament: true,
+        },
+      ];
+
+      if (page2Stories.length > 0) {
+        page2Blocks.push({
+          type: 'story_grid',
+          stories: page2Stories,
+          columns: 2,
+        });
+        page2Blocks.push({ type: 'divider', variant: 'thick' });
+      }
+
+      if (includeEconomics) {
+        page2Blocks.push({
+          type: 'economic_calendar',
+          title: 'ECONOMIC SCHEDULE & CONSENSUS PROJECTIONS',
+          events: economicEvents,
+        });
+        page2Blocks.push({ type: 'divider', variant: 'thin' });
+      }
+
+      page2Blocks.push({
+        type: 'colophon',
+        colophon: 'PUBLISHED VIA THE FYNENCE TELEGRAPHIC SYNDICATE · PRINTED ON DIGITAL BROADSHEET',
+        disclaimer: 'Informational financial dispatch. Strictly non-advisory.',
+        sourceAttribution: 'Wires: Reuters, Bloomberg, AP, Financial Times. Data: Twelve Data, Open-Meteo.',
+      });
+
+      const page2: NewspaperPage = {
+        pageNumber: 2,
+        totalPages: 2,
+        header: {
+          runningTitle: `${title} · ${subtitle}`,
+          pageDate: formattedShortDate,
+          sectionName: 'PAGE TWO',
+        },
+        blocks: page2Blocks,
+        footer: {
+          colophon: 'THE FYNENCE · ALL RIGHTS RESERVED',
+          pageNumber: 2,
+          totalPages: 2,
+        },
+      };
+
+      return [page1, page2];
+    }
+
+    // Medium story count (7–9 stories): 2 pages with higher density
+    if (totalStories <= 9) {
+      const page1Secondary = secondaryStories.slice(0, 2);
+      if (page1Secondary.length > 0) {
+        page1Blocks.push({
+          type: 'story_grid',
+          stories: page1Secondary,
+          columns: 2,
+        });
+        page1Blocks.push({ type: 'divider', variant: 'thin' });
+      }
+
+      if (includeWeather && weather) {
+        page1Blocks.push(weather);
+      }
+
+      const page1: NewspaperPage = {
+        pageNumber: 1,
+        totalPages: 2,
+        blocks: page1Blocks,
+        footer: {
+          colophon: 'CONTINUED ON PAGE 2 · SECOND BROADSHEET EDITION',
+          pageNumber: 1,
+          totalPages: 2,
+        },
+      };
+
+      const page2Stories = secondaryStories.slice(2);
+      const page2Blocks: NewspaperBlock[] = [
+        {
+          type: 'section_header',
+          title: editionType === 'finance_economy' ? 'FINANCE & ECONOMIC REVIEWS' : 'GLOBAL & REGIONAL DISPATCHES',
+          subtitle: 'CONTINUATION DESK · SECOND EDITION PAGE',
+          ornament: true,
+        },
+        {
+          type: 'story_grid',
+          stories: page2Stories,
+          columns: 2,
+        },
+        { type: 'divider', variant: 'thick' },
+      ];
+
+      if (includeEconomics) {
+        page2Blocks.push({
+          type: 'economic_calendar',
+          title: 'ECONOMIC SCHEDULE & CONSENSUS PROJECTIONS',
+          events: economicEvents,
+        });
+        page2Blocks.push({ type: 'divider', variant: 'thin' });
+      }
+
+      page2Blocks.push({
+        type: 'colophon',
+        colophon: 'PUBLISHED VIA THE FYNENCE TELEGRAPHIC SYNDICATE · PRINTED ON DIGITAL BROADSHEET',
+        disclaimer: 'Informational financial dispatch. Strictly non-advisory.',
+        sourceAttribution: 'Wires: Reuters, Bloomberg, AP, Financial Times. Data: Twelve Data, Open-Meteo.',
+      });
+
+      const page2: NewspaperPage = {
+        pageNumber: 2,
+        totalPages: 2,
+        header: {
+          runningTitle: `${title} · ${subtitle}`,
+          pageDate: formattedShortDate,
+          sectionName: 'PAGE TWO',
+        },
+        blocks: page2Blocks,
+        footer: {
+          colophon: 'THE FYNENCE · ALL RIGHTS RESERVED',
+          pageNumber: 2,
+          totalPages: 2,
+        },
+      };
+
+      return [page1, page2];
+    }
+
+    // FULL NEWSPAPER EDITION (10–15 STORIES): 3 PAGES (Section 14)
+    // Page 1: Stories 1–5 (Lead + 4 secondary in 2-column grid) + Weather
+    // Page 2: Stories 6–10 (Section header + 5 stories in 2-column grid)
+    // Page 3: Stories 11–15 (Section header + remaining stories + Calendar + Colophon)
+    const page1Secondary = secondaryStories.slice(0, 4);
     if (page1Secondary.length > 0) {
       page1Blocks.push({
-        type: 'story',
-        story: page1Secondary[0],
-        columnSpan: 3,
+        type: 'story_grid',
+        stories: page1Secondary,
+        columns: 2,
       });
       page1Blocks.push({ type: 'divider', variant: 'thin' });
     }
@@ -455,54 +647,42 @@ export class EditionComposer {
 
     const page1: NewspaperPage = {
       pageNumber: 1,
-      totalPages: 2,
+      totalPages: 3,
       blocks: page1Blocks,
       footer: {
-        colophon: 'CONTINUED ON PAGE 2 · FINANCIAL INTELLIGENCE & CAPITAL MARKETS',
+        colophon: 'CONTINUED ON PAGE 2 · MACROECONOMIC POLICY & FINANCIAL ARCHITECTURE',
         pageNumber: 1,
-        totalPages: 2,
+        totalPages: 3,
       },
     };
 
-    // Page 2: Section Header + Remaining Stories + Economic Calendar + Colophon
-    const page2Stories = secondaryStories.slice(1);
+    // Page 2: Stories 6 to 10
+    const page2Stories = secondaryStories.slice(4, 9);
+    const page2SectionTitle =
+      editionType === 'finance_economy'
+        ? 'FINANCE & MACROECONOMIC ARCHITECTURE'
+        : editionType === 'market'
+        ? 'CAPITAL MARKETS & INSTITUTIONAL ASSETS'
+        : 'GLOBAL & REGIONAL DISPATCHES';
+
     const page2Blocks: NewspaperBlock[] = [
       {
         type: 'section_header',
-        title: editionType === 'finance_economy' ? 'FINANCE & ECONOMIC REVIEWS' : 'GLOBAL & REGIONAL DISPATCHES',
+        title: page2SectionTitle,
         subtitle: 'CONTINUATION DESK · SECOND EDITION PAGE',
         ornament: true,
       },
-    ];
-
-    if (page2Stories.length > 0) {
-      page2Blocks.push({
+      {
         type: 'story_grid',
         stories: page2Stories,
         columns: 2,
-      });
-      page2Blocks.push({ type: 'divider', variant: 'thick' });
-    }
-
-    if (includeEconomics) {
-      page2Blocks.push({
-        type: 'economic_calendar',
-        title: 'ECONOMIC SCHEDULE & CONSENSUS PROJECTIONS',
-        events: economicEvents,
-      });
-      page2Blocks.push({ type: 'divider', variant: 'thin' });
-    }
-
-    page2Blocks.push({
-      type: 'colophon',
-      colophon: 'PUBLISHED VIA THE FYNENCE TELEGRAPHIC SYNDICATE · PRINTED ON DIGITAL BROADSHEET',
-      disclaimer: 'Informational financial dispatch. Strictly non-advisory.',
-      sourceAttribution: 'Wires: Reuters, Bloomberg, AP, Financial Times. Data: Twelve Data, Open-Meteo.',
-    });
+      },
+      { type: 'divider', variant: 'thick' },
+    ];
 
     const page2: NewspaperPage = {
       pageNumber: 2,
-      totalPages: 2,
+      totalPages: 3,
       header: {
         runningTitle: `${title} · ${subtitle}`,
         pageDate: formattedShortDate,
@@ -510,13 +690,69 @@ export class EditionComposer {
       },
       blocks: page2Blocks,
       footer: {
-        colophon: 'THE FYNENCE · ALL RIGHTS RESERVED',
+        colophon: 'CONTINUED ON PAGE 3 · CAPITAL MARKETS, COMMERCE & DISPATCHES',
         pageNumber: 2,
-        totalPages: 2,
+        totalPages: 3,
       },
     };
 
-    return [page1, page2];
+    // Page 3: Stories 11 to 15 + Economics + Colophon
+    const page3Stories = secondaryStories.slice(9);
+    const page3SectionTitle =
+      editionType === 'finance_economy'
+        ? 'CAPITAL MARKETS, ENTERPRISE & COMMERCE'
+        : editionType === 'market'
+        ? 'CURRENCY MARKETS, DERIVATIVES & COMMODITIES'
+        : 'ENTERPRISE, TECHNOLOGY & REAL ECONOMY';
+
+    const page3Blocks: NewspaperBlock[] = [
+      {
+        type: 'section_header',
+        title: page3SectionTitle,
+        subtitle: 'DISPATCHES & INDICATORS · THIRD EDITION PAGE',
+        ornament: true,
+      },
+      {
+        type: 'story_grid',
+        stories: page3Stories,
+        columns: 2,
+      },
+      { type: 'divider', variant: 'thick' },
+    ];
+
+    if (includeEconomics) {
+      page3Blocks.push({
+        type: 'economic_calendar',
+        title: 'ECONOMIC SCHEDULE & CONSENSUS PROJECTIONS',
+        events: economicEvents,
+      });
+      page3Blocks.push({ type: 'divider', variant: 'thin' });
+    }
+
+    page3Blocks.push({
+      type: 'colophon',
+      colophon: 'PUBLISHED VIA THE FYNENCE TELEGRAPHIC SYNDICATE · PRINTED ON DIGITAL BROADSHEET',
+      disclaimer: 'Informational financial dispatch. Strictly non-advisory.',
+      sourceAttribution: 'Wires: Reuters, Bloomberg, AP, Financial Times. Data: Twelve Data, Open-Meteo.',
+    });
+
+    const page3: NewspaperPage = {
+      pageNumber: 3,
+      totalPages: 3,
+      header: {
+        runningTitle: `${title} · ${subtitle}`,
+        pageDate: formattedShortDate,
+        sectionName: 'PAGE THREE',
+      },
+      blocks: page3Blocks,
+      footer: {
+        colophon: 'THE FYNENCE · ALL RIGHTS RESERVED',
+        pageNumber: 3,
+        totalPages: 3,
+      },
+    };
+
+    return [page1, page2, page3];
   }
 }
 

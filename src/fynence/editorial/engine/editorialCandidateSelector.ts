@@ -87,20 +87,25 @@ export class EditorialCandidateSelector {
     if (customTarget && customTarget > 0) return customTarget;
     const config = getNewsEngineConfig();
     switch (editionType) {
+      case 'finance':
+        return config.financeTarget; // 15
       case 'finance_economy':
-        return config.financeTarget;
+        return 15; // 15 stories target for Finance + Economy
       case 'market':
-        return config.marketsTarget;
+      case 'markets':
+        return config.marketsTarget; // 12
       case 'economy':
-        return config.economyTarget;
+        return config.economyTarget; // 15
       case 'daily':
+        return config.dailyNewsTarget; // 15
       default:
-        return config.dailyNewsTarget;
+        return 15;
     }
   }
 
   /**
    * Selects and synthesizes final newspaper stories from the ranked candidate pool.
+   * Guarantees 10-15 stories when sufficient candidates exist, with zero fabrication.
    */
   public async selectStories(
     candidates: RankedArticleCandidate[],
@@ -120,19 +125,78 @@ export class EditorialCandidateSelector {
     const provider = options.provider || this.defaultProvider;
     const isAiEnabled = options.useAi !== false && Boolean(process.env.GEMINI_API_KEY);
 
+    const finalStories: NewspaperStory[] = [];
+    const usedArticleIds = new Set<string>();
+
     if (isAiEnabled) {
       try {
         const aiStories = await this.selectViaAi(candidates, targetCount, editionType, provider, candidateMap);
-        if (aiStories.length >= Math.min(5, candidates.length)) {
-          return aiStories;
+        for (const s of aiStories) {
+          finalStories.push(s);
+          if (s.originalUrl) usedArticleIds.add(s.originalUrl);
+          usedArticleIds.add(s.id);
         }
       } catch (err: any) {
         console.warn(`[EditorialCandidateSelector] AI selection fallback triggered: ${err?.message}`);
       }
     }
 
-    // Deterministic High-Quality Fallback (Zero Hallucination, Zero Loss)
-    return this.selectDeterministically(candidates, targetCount);
+    // SECTION 11 FALLBACK SELECTION:
+    // If Gemini returns fewer stories than targetStoryCount (or AI is unavailable),
+    // deterministically backfill from the remaining ranked candidates to reach targetStoryCount.
+    if (finalStories.length < targetCount) {
+      const maxStoriesPerSource = typeof process !== 'undefined' && process.env?.MAX_STORIES_PER_SOURCE
+        ? parseInt(process.env.MAX_STORIES_PER_SOURCE, 10) || 4
+        : 4;
+
+      const sourceCounts = new Map<string, number>();
+      for (const fs of finalStories) {
+        const src = (fs.source || 'unknown').toLowerCase();
+        sourceCounts.set(src, (sourceCounts.get(src) || 0) + 1);
+      }
+
+      const remainingCandidates = candidates.filter(c => {
+        if (usedArticleIds.has(c.article.url) || usedArticleIds.has(c.article.id)) return false;
+        // Duplicate check against headlines already selected
+        const titleNorm = c.article.title.toLowerCase().trim();
+        for (const fs of finalStories) {
+          if (fs.headline.toLowerCase().trim() === titleNorm) return false;
+        }
+        return true;
+      });
+
+      const needed = targetCount - finalStories.length;
+
+      // Section 9: Source diversity - prioritize diverse sources up to maxStoriesPerSource
+      const diverseCandidates: RankedArticleCandidate[] = [];
+      const overflowCandidates: RankedArticleCandidate[] = [];
+
+      for (const cand of remainingCandidates) {
+        const src = (cand.article.source || 'unknown').toLowerCase();
+        const count = sourceCounts.get(src) || 0;
+        if (count < maxStoriesPerSource) {
+          diverseCandidates.push(cand);
+          sourceCounts.set(src, count + 1);
+        } else {
+          overflowCandidates.push(cand);
+        }
+      }
+
+      // If diverse candidates are insufficient to meet targetStoryCount, use overflow candidates
+      // so the newspaper edition never starves or shrinks unnecessarily
+      const candidatesToSelect = [...diverseCandidates, ...overflowCandidates];
+      const backfillStories = this.selectDeterministically(candidatesToSelect, needed, finalStories.length);
+      finalStories.push(...backfillStories);
+    }
+
+    // SECTION 12 FINAL STORY COUNT VALIDATION
+    if (finalStories.length < targetCount) {
+      console.warn(
+        `[EditorialEngine] TARGET: ${targetCount}, FINAL: ${finalStories.length}, REASON: only ${finalStories.length} eligible stories available`
+      );
+    }
+
+    return finalStories;
   }
 
   /**
@@ -145,8 +209,9 @@ export class EditorialCandidateSelector {
     provider: AIProvider,
     candidateMap: Map<string, RankedArticleCandidate>
   ): Promise<NewspaperStory[]> {
-    // Build candidate representation for Gemini prompt
-    const candidateDescriptions = candidates.slice(0, 40).map((c, i) => {
+    // Build candidate representation for Gemini prompt (send up to 60-80 candidates)
+    const maxCandidatesToSend = Math.min(candidates.length, editionType === 'daily' ? 80 : 70);
+    const candidateDescriptions = candidates.slice(0, maxCandidatesToSend).map((c, i) => {
       const art = c.article;
       const corroborating = c.corroboratingSources.length > 0
         ? ` (Corroborated by: ${c.corroboratingSources.map(s => s.source).join(', ')})`
@@ -161,19 +226,21 @@ Summary: ${art.description || art.content?.slice(0, 300) || art.title}`;
 
     const prompt = `You are the Editor-in-Chief of THE FYNENCE broadsheet newspaper.
 We are curating the "${editionType.toUpperCase()}" edition.
-Select up to ${targetCount} of the most structurally impactful, significant stories from the candidates below.
+Select up to ${targetCount} distinct, relevant, and structurally impactful stories from the candidates below.
 
 EDITORIAL CRITERIA:
-1. Select exactly up to ${targetCount} stories across diverse categories.
-2. Select 1 or 2 lead stories and mark importance as "high".
-3. Write authoritative, objective broadsheet headlines (no clickbait, no jargon exaggeration).
-4. Synthesize verified details into a concise 2-4 sentence summary.
-5. Provide a "Why It Matters" note (1-2 sentences on financial or macroeconomic impact).
-6. Provide 2-3 key points.
-7. Set candidateId to the EXACT candidate ID from the list.
+1. Select up to ${targetCount} distinct stories across diverse categories and market themes.
+2. Source diversity: Do not select more than 3-4 stories from the same publisher unless alternatives are scarce.
+3. Select 1 or 2 lead stories and mark importance as "high". The remainder should be "medium" or "low".
+4. Write authoritative, objective broadsheet headlines (no clickbait, no jargon exaggeration).
+5. Synthesize verified details into a concise 2-4 sentence summary strictly derived from source text.
+6. Provide a "Why It Matters" note (1-2 sentences on financial or macroeconomic impact).
+7. Provide 2-3 key points.
+8. Set candidateId to the EXACT candidate ID from the list.
 
 STRICT VERACITY RULES:
 - Never fabricate data, events, or quotes not present in the candidate descriptions.
+- Do not select duplicate stories covering the exact same event.
 - Preserve the exact candidate ID.
 
 CANDIDATES:
@@ -248,14 +315,16 @@ ${candidateDescriptions}`;
    */
   public selectDeterministically(
     candidates: RankedArticleCandidate[],
-    targetCount: number
+    targetCount: number,
+    startIndex: number = 0
   ): NewspaperStory[] {
     const selected = candidates.slice(0, targetCount);
 
     return selected.map((cand, idx) => {
+      const globalIdx = startIndex + idx;
       const art = cand.article;
-      const isLead = idx === 0;
-      const importance: NewspaperStory['importance'] = isLead ? 'high' : idx < 4 ? 'medium' : 'low';
+      const isLead = globalIdx === 0;
+      const importance: NewspaperStory['importance'] = isLead ? 'high' : globalIdx < 4 ? 'medium' : 'low';
       const columnSpan = importance === 'high' ? 3 : importance === 'medium' ? 2 : 1;
 
       let image: NewspaperStoryImage | undefined = undefined;
@@ -277,7 +346,7 @@ ${candidateDescriptions}`;
       keyPoints.push(`Reported by ${art.source} on ${new Date(art.publishedAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`);
 
       return {
-        id: `story-${idx + 1}`,
+        id: `story-${globalIdx + 1}`,
         headline: art.title,
         kicker: `${art.category.toUpperCase()} DISPATCH · ${art.source.toUpperCase()}`,
         summary: art.description || art.content?.slice(0, 350) || art.title,

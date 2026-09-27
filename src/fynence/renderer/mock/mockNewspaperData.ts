@@ -225,6 +225,287 @@ export const MOCK_STORIES: NewspaperStory[] = [
     importance: 'medium',
     columnSpan: 2,
   },
+  {
+    id: 'story-finance-13',
+    headline: 'Central Bank Liquidity Windows Record Balanced Collateral Utilization',
+    kicker: 'MONETARY OPERATIONS',
+    summary:
+      'Commercial banking institutions balanced their overnight standing facility allocations, reflecting ample reserves across systemic interbank markets and minimal dependence on discount borrowing.',
+    whyItMatters:
+      'Balanced central bank facility usage indicates steady financial stability and predictable liquidity distribution across the domestic banking architecture.',
+    source: 'Financial Times Syndicate',
+    originalUrl: 'https://ft.com/central-banks/standing-facility-liquidity',
+    author: 'David Sterling, London',
+    publishedAt: '2026-09-27T03:15:00Z',
+    section: 'finance',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-economy-14',
+    headline: 'Quarterly Industrial Output Surpasses Consensus Projections on Strong Export Orders',
+    kicker: 'REAL ECONOMY',
+    summary:
+      'Factory orders and machine tooling indicators registered accelerated expansion across manufacturing hubs, driven by resilient bilateral trade volumes and automated capital tooling investments.',
+    whyItMatters:
+      'Industrial acceleration bolsters macroeconomic gross domestic output and cushions balance-of-payments resilience.',
+    source: 'Bloomberg News Service',
+    originalUrl: 'https://bloomberg.com/news/industrial-production-expansion',
+    publishedAt: '2026-09-27T01:45:00Z',
+    section: 'economy',
+    importance: 'medium',
+    columnSpan: 2,
+    image: {
+      url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80',
+      credit: 'Bloomberg Industrial Photo',
+      source: 'Bloomberg News Service',
+      caption: 'Automated factory floor during continuous tooling operations.',
+      aspectRatio: '16:9',
+      isAiGenerated: false,
+    },
+  },
+  {
+    id: 'story-markets-15',
+    headline: 'Primary Corporate Bond Issuance Spreads Tighten Across Investment-Grade Names',
+    kicker: 'DEBT CAPITAL MARKETS',
+    summary:
+      'Syndicated debt orderbooks recorded three-fold oversubscription for high-grade industrial notes, as institutional asset managers locked in attractive coupon yields prior to benchmark rate adjustments.',
+    whyItMatters:
+      'Tight credit spreads lower weighted average cost of capital for corporate balance sheets and support enterprise expansion projects.',
+    source: 'Reuters Financial Wires',
+    originalUrl: 'https://reuters.com/markets/bonds/spreads-tighten',
+    author: 'Hannah Becker, Frankfurt',
+    publishedAt: '2026-09-27T02:20:00Z',
+    section: 'markets',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-forex-16',
+    headline: 'Cross-Border Real-Time Payment Linkages Expand Regional Trade Bilaterals',
+    kicker: 'FOREIGN EXCHANGE CHRONICLE',
+    summary:
+      'Multilateral central bank accords established direct local-currency settlement linkages between sovereign trade partners, bypassing intermediary conversion corridors and mitigating dollar dependency.',
+    whyItMatters:
+      'Local currency clearing reduces international transactional costs and insulates bilateral trade from global currency swings.',
+    source: 'The Jakarta Post Wire',
+    originalUrl: 'https://thejakartapost.com/business/local-currency-settlement',
+    publishedAt: '2026-09-27T00:50:00Z',
+    section: 'forex',
+    importance: 'medium',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-crypto-17',
+    headline: 'Decentralized Settlement Networks Implement Enhanced Proof-of-Reserve Standards',
+    kicker: 'DIGITAL LEDGER DISPATCH',
+    summary:
+      'Major blockchain infrastructure developers released verified cryptographic solvency attestations certified by accredited auditing entities, reinforcing transparency across cross-chain liquidity vaults.',
+    whyItMatters:
+      'Standardized reserve transparency mitigates platform insolvency contagion and supports regulated institutional settlement pilots.',
+    source: 'CoinDesk Syndicate',
+    originalUrl: 'https://coindesk.com/tech/proof-of-reserves-expansion',
+    publishedAt: '2026-09-26T21:00:00Z',
+    section: 'crypto',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-biz-18',
+    headline: 'Global Maritime Shipping Rates Normalize as Container Supply Recovers',
+    kicker: 'COMMERCE & LOGISTICS',
+    summary:
+      'Spot container rates along primary transpacific and trans-Suez shipping lanes stabilized to multi-month averages as newly built container carriers entered commercial service schedules.',
+    whyItMatters:
+      'Predictable container freight expenditure dampens headline cost-push import inflation across consumer retail and durable goods.',
+    source: 'Associated Press Syndicate',
+    originalUrl: 'https://apnews.com/business/maritime-shipping-rates',
+    publishedAt: '2026-09-26T22:40:00Z',
+    section: 'business',
+    importance: 'medium',
+    columnSpan: 2,
+  },
+  {
+    id: 'story-finance-19',
+    headline: 'Private Credit Funds Secure Commitments from Sovereign Wealth Portfolios',
+    kicker: 'ASSET ALLOCATION DESK',
+    summary:
+      'Direct lending asset managers announced closed fund syndications exceeding forty billion dollars, with sovereign pension mandates seeking senior secured floating yields with equity downside covenants.',
+    whyItMatters:
+      'Institutional private debt provides alternative liquidity pipelines for mid-sized commercial enterprises during strict bank lending regimes.',
+    source: 'Financial Times Wire',
+    originalUrl: 'https://ft.com/markets/private-credit-allocations',
+    author: 'Alistair Campbell, Edinburgh',
+    publishedAt: '2026-09-27T03:00:00Z',
+    section: 'finance',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-economy-20',
+    headline: 'National Employment Metrics Exhibit Resilient Labor Market Absorptions',
+    kicker: 'MACRO MONITOR',
+    summary:
+      'Government statistical agencies confirmed sustained employment growth across service and technical manufacturing domains, with prime-age workforce participation climbing toward cyclical peaks.',
+    whyItMatters:
+      'Durable employment figures provide consumer disposable income stability and underpin domestic household consumption expenditure.',
+    source: 'Bloomberg News Service',
+    originalUrl: 'https://bloomberg.com/news/labor-market-resilience',
+    publishedAt: '2026-09-27T02:10:00Z',
+    section: 'economy',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-markets-21',
+    headline: 'Benchmark Precious Metals Benefit from Heightened Central Bank Reserve Accumulation',
+    kicker: 'COMMODITIES & METALS',
+    summary:
+      'Physical bullion holdings across central banking reserve managers recorded consistent monthly accretions, sustaining gold benchmark pricing above long-term technical moving averages.',
+    whyItMatters:
+      'Official reserve diversification cushions emerging market balance sheets against geopolitical volatility and exchange reserve shocks.',
+    source: 'MarketWatch Top Stories',
+    originalUrl: 'https://marketwatch.com/story/central-bank-gold-purchases',
+    publishedAt: '2026-09-27T01:25:00Z',
+    section: 'markets',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-biz-22',
+    headline: 'Renewable Power Transmission Grids Attract Multi-Billion Infrastructure Bids',
+    kicker: 'ENERGY INFRASTRUCTURE',
+    summary:
+      'State utility operators awarded high-voltage direct-current transmission contracts to engineering consortiums, aiming to connect offshore generation directly to high-demand industrial metropolitan corridors.',
+    whyItMatters:
+      'Transmission grid expansion eliminates energy curtailment and accelerates regional commercial decarbonization targets.',
+    source: 'Reuters Financial Wires',
+    originalUrl: 'https://reuters.com/business/energy/transmission-grid-contracts',
+    publishedAt: '2026-09-26T23:30:00Z',
+    section: 'business',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-finance-23',
+    headline: 'Sovereign Wealth Funds Increase Allocations to Core Infrastructure Assets',
+    kicker: 'CAPITAL ALLOCATION',
+    summary:
+      'Global institutional asset owners committed record capital to regulated utilities, transportation corridors, and renewable power installations, seeking contractual yield that outpaces long-term inflationary benchmarks.',
+    whyItMatters:
+      'Direct infrastructure investment provides stable duration matching for pension liabilities while insulating balance sheets from equity market beta.',
+    source: 'Financial Times Wire',
+    originalUrl: 'https://ft.com/dispatches/sovereign-wealth-infrastructure',
+    publishedAt: '2026-09-27T01:00:00Z',
+    section: 'finance',
+    importance: 'medium',
+    columnSpan: 2,
+  },
+  {
+    id: 'story-economy-24',
+    headline: 'Global Supply Chain Pressure Index Drops to Three-Year Neutral Benchmark',
+    kicker: 'GLOBAL TRADE DESK',
+    summary:
+      'Maritime freight backlogs, component lead times, and air cargo rates have fully normalized across transpacific and European lanes, substantially mitigating upside cost pressures on manufactured goods.',
+    whyItMatters:
+      'Normalized logistics friction allows central banks greater room to ease monetary restrictions without rekindling cost-push inflation.',
+    source: 'Wall Street Journal',
+    originalUrl: 'https://wsj.com/economy/trade/supply-chain-normalization',
+    publishedAt: '2026-09-27T01:15:00Z',
+    section: 'economy',
+    importance: 'medium',
+    columnSpan: 2,
+  },
+  {
+    id: 'story-markets-25',
+    headline: 'High-Yield Corporate Credit Default Swap Spreads Tighten on Low Default Rates',
+    kicker: 'FIXED INCOME',
+    summary:
+      'North American and European synthetic credit indices traded at narrow margins as trailing default projections fell to historic lows, supported by solid corporate interest coverage ratios.',
+    whyItMatters:
+      'Tight credit spreads signal broad institutional risk appetite and frictionless refinancing access for sub-investment grade borrowers.',
+    source: 'Bloomberg Markets',
+    originalUrl: 'https://bloomberg.com/markets/credit/cds-spreads-compression',
+    publishedAt: '2026-09-27T01:30:00Z',
+    section: 'markets',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-business-26',
+    headline: 'Semiconductor Fabrication Toolmakers Report Robust Multi-Quarter Order Backlogs',
+    kicker: 'INDUSTRIAL TECH',
+    summary:
+      'Advanced photolithography and wafer packaging equipment vendors recorded significant new commitments from foundries expanding leading-edge process node fabrication capacity.',
+    whyItMatters:
+      'Equipment vendor backlogs serve as a leading indicator of global high-performance computing and artificial intelligence hardware deployment.',
+    source: 'Reuters Financial Wires',
+    originalUrl: 'https://reuters.com/business/tech/semiconductor-tool-orders',
+    publishedAt: '2026-09-27T01:45:00Z',
+    section: 'business',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-finance-27',
+    headline: 'Commercial Paper Rates Rebound Moderately Following Quarterly Corporate Tax Date',
+    kicker: 'MONEY MARKETS',
+    summary:
+      'Tier-1 financial commercial paper yields adjusted upward by 3 basis points as treasury desks rebalanced liquidity buffers to accommodate seasonal corporate fiscal obligations.',
+    whyItMatters:
+      'Short-term money market equilibrium demonstrates orderly cash distribution across primary dealers without requiring central bank intervention.',
+    source: 'Financial Times Wire',
+    originalUrl: 'https://ft.com/markets/money/commercial-paper-rates',
+    publishedAt: '2026-09-27T02:00:00Z',
+    section: 'finance',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-economy-28',
+    headline: 'Wholesale Inventory-to-Sales Ratios Hold Steady Across Durable Goods Sectors',
+    kicker: 'MACRO MONITOR',
+    summary:
+      'Warehouse inventory metrics remained stable throughout the third quarter as retail replenishment matched real-time electronic point-of-sale volume.',
+    whyItMatters:
+      'Balanced inventory ratios reduce the danger of sudden destocking cycles that historically trigger manufacturing contractions.',
+    source: 'MarketWatch Top Stories',
+    originalUrl: 'https://marketwatch.com/economy/inventory-sales-ratio',
+    publishedAt: '2026-09-27T02:15:00Z',
+    section: 'economy',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-markets-29',
+    headline: 'Commodity Index Funds Rebalance Toward Agricultural and Base Metal Contracts',
+    kicker: 'DERIVATIVES DESK',
+    summary:
+      'Passive benchmark index roll operations generated elevated liquidity in copper and wheat futures as multi-asset portfolios reweighted target exposures.',
+    whyItMatters:
+      'Contractual reweighting transfers structural liquidity into base metals essential for long-term power grid and transportation electrification.',
+    source: 'Bloomberg Markets',
+    originalUrl: 'https://bloomberg.com/markets/commodities/index-rebalancing',
+    publishedAt: '2026-09-27T02:30:00Z',
+    section: 'markets',
+    importance: 'low',
+    columnSpan: 1,
+  },
+  {
+    id: 'story-forex-30',
+    headline: 'Trade-Weighted Dollar Index Consolidates Inside Narrow Range Ahead of Trade Data',
+    kicker: 'CURRENCIES',
+    summary:
+      'Major currency pairs showed subdued price movement in early London trading, with the Japanese yen and British pound trading within tight 20-pip ranges against the greenback.',
+    whyItMatters:
+      'Currency consolidation dampens cross-border hedging volatility and facilitates predictable transaction clearing for international trade accounts.',
+    source: 'Reuters Financial Wires',
+    originalUrl: 'https://reuters.com/markets/currencies/trade-weighted-dollar',
+    publishedAt: '2026-09-27T02:45:00Z',
+    section: 'forex',
+    importance: 'low',
+    columnSpan: 1,
+  },
 ];
 
 export const MOCK_TICKERS: MarketTickerItem[] = [

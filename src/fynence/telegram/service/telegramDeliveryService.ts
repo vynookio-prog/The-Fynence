@@ -95,6 +95,73 @@ export class TelegramDeliveryService implements ITelegramDeliveryService {
   }
 
   /**
+   * Dispatches all broadsheet pages as images with page indicators.
+   * If only one page exists, delegates directly to deliverEditionImage.
+   */
+  public async deliverEditionAllPages(
+    chatId: number,
+    renderResult: any,
+    caption?: string
+  ): Promise<TelegramDeliveryRecord[]> {
+    const pages: Array<{ buffer: Buffer; mimeType?: string; pageNumber?: number }> =
+      renderResult.imagePages || (renderResult.imageBuffer ? [{ buffer: renderResult.imageBuffer, pageNumber: 1 }] : []);
+
+    if (pages.length <= 1) {
+      const single = await this.deliverEditionImage(chatId, renderResult, caption);
+      return [single];
+    }
+
+    const records: TelegramDeliveryRecord[] = [];
+    const baseCaption = caption || '🗞️ THE FYNENCE BROADSHEET';
+
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+      const pageNum = page.pageNumber || i + 1;
+      const pageCaption = `${baseCaption}\n📄 Page ${pageNum} of ${pages.length}`;
+      const fileName = `THE_FYNENCE_PAGE_${pageNum}.png`;
+
+      try {
+        const file = new InputFile(page.buffer, fileName);
+        let sentMsg: any;
+        try {
+          sentMsg = await this.api.sendPhoto(chatId, file, { caption: pageCaption });
+        } catch {
+          sentMsg = await this.api.sendDocument(chatId, file, { caption: pageCaption });
+        }
+
+        const record: TelegramDeliveryRecord = {
+          editionId: renderResult.editionId || 'unknown',
+          chatId,
+          telegramUserId: chatId,
+          messageId: sentMsg.message_id,
+          formatSent: 'png',
+          status: 'sent',
+          sentAt: new Date().toISOString(),
+        };
+
+        await this.recordDeliverySafe(record);
+        records.push(record);
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        const record: TelegramDeliveryRecord = {
+          editionId: renderResult.editionId || 'unknown',
+          chatId,
+          telegramUserId: chatId,
+          messageId: 0,
+          formatSent: 'png',
+          status: 'failed',
+          sentAt: new Date().toISOString(),
+          errorMessage: errMsg,
+        };
+        await this.recordDeliverySafe(record);
+        records.push(record);
+      }
+    }
+
+    return records;
+  }
+
+  /**
    * Dispatches high-resolution vector PDF document.
    */
   public async deliverEditionPdf(

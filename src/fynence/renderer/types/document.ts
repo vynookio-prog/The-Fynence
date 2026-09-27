@@ -205,4 +205,5 @@ export interface NewspaperEditionMetadata {
 export interface NewspaperDocument {
   edition: NewspaperEditionMetadata;
   pages: NewspaperPage[];
+  stories?: NewspaperStory[];
 }

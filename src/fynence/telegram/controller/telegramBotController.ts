@@ -315,9 +315,13 @@ export class TelegramBotController {
 
       const caption = this.deliveryService.buildCaption(result.title, result.subtitle, result.editionDate);
 
-      // 6. Deliver Image if requested
-      if ((format === 'image' || format === 'both') && result.imageBuffer) {
-        await this.deliveryService.deliverEditionImage(chatId, result, caption);
+      // 6. Deliver Image if requested (delivers all pages for multi-page editions)
+      if ((format === 'image' || format === 'both') && (result.imageBuffer || (result.imagePages && result.imagePages.length > 0))) {
+        if (result.imagePages && result.imagePages.length > 1) {
+          await this.deliveryService.deliverEditionAllPages(chatId, result, caption);
+        } else {
+          await this.deliveryService.deliverEditionImage(chatId, result, caption);
+        }
       }
 
       // 7. Deliver PDF if requested

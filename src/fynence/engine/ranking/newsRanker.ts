@@ -1,7 +1,7 @@
 import type { Article, ArticleCategory } from '../../types/article';
 import { sourceRegistry } from '../registry/sourceRegistry';
 import { tokenizeTitle, calculateJaccardSimilarity } from '../deduplicator/titleNormalizer';
-import { getNewsEngineConfig } from '../config/newsEngineConfig';
+import { getNewsEngineConfig, EDITION_TARGET_PRESETS } from '../config/newsEngineConfig';
 
 export interface CorroboratingSource {
   articleId: string;
@@ -249,9 +249,10 @@ export class NewsRanker {
     const editionType = options.editionType || 'daily';
     const freshnessHours = options.freshnessHours ?? config.freshnessHours;
     const maxPerSource = options.maxArticlesPerSource ?? config.maxArticlesPerSource;
-    const targetPoolSize = options.targetPoolSize ?? (editionType === 'daily' ? 45 : 30);
-    const minPoolSize = options.minPoolSize ?? (editionType === 'daily' ? 25 : 18);
-    const maxPoolSize = options.maxPoolSize ?? (editionType === 'daily' ? 60 : 40);
+    const preset = EDITION_TARGET_PRESETS[editionType] || EDITION_TARGET_PRESETS.daily;
+    const targetPoolSize = options.targetPoolSize ?? Math.round((preset.minCandidates + preset.maxCandidates) / 2);
+    const minPoolSize = options.minPoolSize ?? preset.minCandidates;
+    const maxPoolSize = options.maxPoolSize ?? preset.maxCandidates;
 
     const allowedCategories = this.resolveEditionCategories(editionType, options.sections);
 
@@ -286,6 +287,7 @@ export class NewsRanker {
     // 4. Source Diversity Capping & Scoring
     const sourceCountMap = new Map<string, number>();
     const scoredCandidates: RankedArticleCandidate[] = [];
+    const overflowArticles: Article[] = [];
 
     for (const art of primaryArticles) {
       const srcKey = (art.source || 'unknown').toLowerCase();
@@ -293,6 +295,7 @@ export class NewsRanker {
 
       if (currentCount >= maxPerSource) {
         sourceCapped++;
+        overflowArticles.push(art);
         continue;
       }
 
@@ -307,6 +310,27 @@ export class NewsRanker {
         clusterTopic: corroborating.length > 0 ? art.title : undefined,
         corroboratingSources: corroborating,
       });
+    }
+
+    // Section 9 Safety: Do not make source capping so strict that the edition becomes empty.
+    // If strict capping resulted in 0 candidates and overflow articles exist, allow them.
+    if (scoredCandidates.length === 0 && overflowArticles.length > 0) {
+      for (const art of overflowArticles) {
+        if (scoredCandidates.length >= maxPoolSize) break;
+        const srcKey = (art.source || 'unknown').toLowerCase();
+        const currentCount = sourceCountMap.get(srcKey) || 0;
+        const { score, breakdown } = this.computeCandidateScore(art, currentCount, nowMs);
+        sourceCountMap.set(srcKey, currentCount + 1);
+        const corroborating = clusters.get(art.id) || [];
+        scoredCandidates.push({
+          article: art,
+          score: Math.max(1, score - 5), // Slight penalty for exceeding source cap
+          breakdown,
+          clusterTopic: corroborating.length > 0 ? art.title : undefined,
+          corroboratingSources: corroborating,
+        });
+      }
+      sourceCapped = Math.max(0, overflowArticles.length - scoredCandidates.length);
     }
 
     // 5. Rank by deterministic total score descending

@@ -78,18 +78,24 @@ export function extractPageLinkAnnotations(
       }
       currentY += (s.image ? 310 : 230);
     } else if (block.type === 'story_grid') {
-      const colWidth = (svgWidth - 116) / 2;
-      block.stories.slice(0, 2).forEach((st, sIdx) => {
-        if (isValidHttpUrl(st.originalUrl)) {
-          const colX = 44 + sIdx * (colWidth + 28);
-          const rect = toPdfRect(colX, currentY, colWidth, 190);
-          annotations.push({
-            url: st.originalUrl,
-            rect,
-          });
-        }
-      });
-      currentY += 226;
+      const cols = block.columns || 2;
+      const gap = 28;
+      const colWidth = (svgWidth - 88 - (cols - 1) * gap) / cols;
+      const stories = block.stories;
+      for (let i = 0; i < stories.length; i += cols) {
+        const rowStories = stories.slice(i, i + cols);
+        rowStories.forEach((st, sIdx) => {
+          if (isValidHttpUrl(st.originalUrl)) {
+            const colX = 44 + sIdx * (colWidth + gap);
+            const rect = toPdfRect(colX, currentY, colWidth, 190);
+            annotations.push({
+              url: st.originalUrl,
+              rect,
+            });
+          }
+        });
+        currentY += 210;
+      }
     } else if (block.type === 'story') {
       const s = block.story;
       if (isValidHttpUrl(s.originalUrl)) {

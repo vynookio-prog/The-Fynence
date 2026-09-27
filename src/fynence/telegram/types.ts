@@ -38,6 +38,9 @@ export interface TelegramEditionRequest {
   theme?: EditionTheme;
   rawText?: string;
   createdAt: string;
+  articles?: any[];
+  mockMode?: boolean;
+  targetStoryCount?: number;
 }
 
 export interface ParsedCommand {
@@ -66,6 +69,7 @@ export interface EditionPipelineResult {
   format: TelegramFormatOption;
   imageBuffer?: Buffer;
   imageMimeType?: string;
+  imagePages?: Array<{ buffer: Buffer; mimeType: string; pageNumber: number }>;
   pdfBuffer?: Buffer;
   pdfFileName?: string;
   sources: TelegramArticleSourceItem[];
